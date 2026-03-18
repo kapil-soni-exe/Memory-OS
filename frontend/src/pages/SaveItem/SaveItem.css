@@ -1,0 +1,118 @@
+.save-page-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.save-page-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: var(--sp-12) var(--sp-8);
+  overflow-y: auto;
+}
+
+.save-page-container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  margin-bottom: var(--sp-10);
+  transition: color var(--ease-fast);
+}
+
+.back-btn:hover {
+  color: var(--color-text-primary);
+}
+
+.save-page-header {
+  text-align: center;
+  margin-bottom: var(--sp-12);
+}
+
+.save-page-icon {
+  width: 64px;
+  height: 64px;
+  background: var(--gradient-accent-subtle);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7F5AF0;
+  margin: 0 auto var(--sp-6);
+}
+
+.save-page-title {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
+  margin-bottom: var(--sp-2);
+}
+
+.save-page-subtitle {
+  font-size: var(--text-lg);
+  color: var(--color-text-secondary);
+}
+
+.save-card {
+  background: var(--color-surface);
+  padding: var(--sp-10);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+}
+
+.save-page-tips {
+  margin-top: var(--sp-12);
+  padding: var(--sp-8);
+  background: var(--color-surface-raised);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.tips-title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  margin-bottom: var(--sp-4);
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.tips-list li {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  position: relative;
+  padding-left: var(--sp-6);
+}
+
+.tips-list li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: #7F5AF0;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .save-page-content {
+    padding: var(--sp-6) var(--sp-4);
+  }
+
+  .save-page-title {
+    font-size: var(--text-3xl);
+  }
+}

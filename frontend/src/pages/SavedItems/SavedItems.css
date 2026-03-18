@@ -1,0 +1,120 @@
+.saved-items-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.saved-items-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.saved-items-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-12) var(--sp-12) var(--sp-20);
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: var(--sp-8);
+}
+
+.page-title {
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: -0.04em;
+}
+
+.search-filter-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  margin-bottom: var(--sp-10);
+}
+
+.search-box-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 600px;
+}
+
+.search-icon {
+  position: absolute;
+  left: var(--sp-4);
+  color: var(--color-text-tertiary);
+}
+
+.saved-search-input {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-12);
+  font-size: var(--text-md);
+  color: var(--color-text-primary);
+  transition: all var(--ease-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.saved-search-input:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
+}
+
+.filter-chips-row {
+  display: flex;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.filter-chip {
+  padding: 8px 18px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: all var(--ease-fast);
+  cursor: pointer;
+}
+
+.filter-chip:hover {
+  background: var(--color-surface-sunken);
+  border-color: var(--color-text-tertiary);
+}
+
+.filter-chip.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.saved-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-6);
+}
+
+.card-clickable-wrapper {
+  cursor: pointer;
+  transition: transform var(--ease-base);
+}
+
+.card-clickable-wrapper:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 768px) {
+  .saved-items-content {
+    padding: var(--sp-8) var(--sp-4) 140px;
+  }
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body class="galaxy-theme">
+    <div class="popup-container glass">
+        <header>
+            <div class="logo-area">
+                <div class="galaxy-orb"></div>
+                <h1>MemoryOS</h1>
+            </div>
+            <span class="status-badge" id="auth-status">Online</span>
+        </header>
+
+        <main>
+            <div class="item-preview">
+                <h2 id="title-preview">Loading Page...</h2>
+                <p id="url-preview"></p>
+            </div>
+
+            <div class="input-group">
+                <label>Add Tags</label>
+                <input type="text" id="tags" placeholder="e.g. research, productivity, ai">
+            </div>
+
+            <div class="input-group">
+                <label>Custom Summary</label>
+                <textarea id="summary" placeholder="What's this about?"></textarea>
+            </div>
+
+            <button id="save-btn" class="primary-btn">
+                <span class="btn-text">Add to Galaxy</span>
+                <div class="btn-glow"></div>
+            </button>
+        </main>
+
+        <footer id="status-message">
+            Ready to capture.
+        </footer>
+    </div>
+    <script src="popup.js"></script>
+</body>
+</html>
