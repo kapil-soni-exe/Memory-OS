@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import MobileTabs from '../components/MobileTabs/MobileTabs';
+import { useAuth } from '../features/auth/hooks/useAuth';
+import MobileTabs from '../layouts/MobileTabs/MobileTabs';
 
 const ProtectedRoute = () => {
   const { authenticated, loading } = useAuth();
