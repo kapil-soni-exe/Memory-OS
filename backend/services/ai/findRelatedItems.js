@@ -5,7 +5,7 @@ export const findRelatedItems = async (vector, userId, currentItemId) => {
 
     const results = await qdrant.search("items_vectors", {
       vector,
-      limit: 3, // top 3 related memories
+      limit: 6, // fetch 6 to comfortably return top 5 related memories after filtering out self
       filter: {
         must: [
           {

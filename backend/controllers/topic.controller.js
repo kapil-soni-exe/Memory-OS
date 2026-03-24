@@ -16,22 +16,34 @@ export const getAllTopics = async (req, res) => {
 // Get Single Topic with Items
 export const getTopicById = async (req, res) => {
   try {
-    const topic = await Topic.findById(req.params.id);
+    const topicId = req.params.id;
 
+    // 1. Fetch topic and items in parallel for performance
+    // Use .lean() for faster execution as these are read-only
+    const [topic, items] = await Promise.all([
+      Topic.findOne({ _id: topicId, user: req.user }).lean(),
+      Item.find({ user: req.user, topicId }).sort({ createdAt: -1 }).lean()
+    ]);
+
+    // 2. Security/Existence check
     if (!topic) {
       return res.status(404).json({
         message: "Topic not found",
       });
     }
 
-    const items = await Item.find({ 
-      user: req.user, 
-      clusterId: topic.clusterId
-    }).sort({ createdAt: -1 });
+    // 3. Fallback for items that might only have clusterId
+    let finalItems = items;
+    if (items.length === 0 && topic.clusterId) {
+      finalItems = await Item.find({ 
+        user: req.user, 
+        clusterId: topic.clusterId
+      }).sort({ createdAt: -1 }).lean();
+    }
 
     res.status(200).json({
       topic,
-      items
+      items: finalItems
     });
   } catch (error) {
     res.status(500).json({

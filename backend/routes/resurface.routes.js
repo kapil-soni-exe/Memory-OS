@@ -7,4 +7,7 @@ const router = express.Router();
 // Get resurfaced memories (On This Day / Random)
 router.get("/", protect, resurfaceController.getResurfaceItems);
 
+// Record interactions (views, likes, skips) for scoring engine
+router.post("/:itemId/interact", protect, resurfaceController.interactItem);
+
 export default router;

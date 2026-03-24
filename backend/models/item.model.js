@@ -37,6 +37,16 @@ const itemSchema = new mongoose.Schema(
     // AI generated summary
     summary: String,
 
+    // AI generated structured knowledge
+    entities: [String],
+    relationships: [
+      {
+        source: String,
+        target: String,
+        relation: String,
+      },
+    ],
+
     // Flexible metadata for different platforms
     metadata: {
       type: mongoose.Schema.Types.Mixed,
@@ -69,6 +79,16 @@ const itemSchema = new mongoose.Schema(
       index: true,
       default: null
     },
+
+    // Resurfacing metrics
+    lastAccessedAt: { type: Date, default: Date.now },
+    lastSurfacedAt: { type: Date, default: null }, 
+    accessCount: { type: Number, default: 0 },
+    interactions: {
+      likes: { type: Number, default: 0 }, 
+      skips: { type: Number, default: 0 }
+    },
+
     // AI processing state
     processingStatus: {
       type: String,

@@ -8,12 +8,11 @@ export const extractYoutube = async (url) => {
     const video = info.videoDetails;
 
     let transcriptText = "";
-
     try {
-      const transcript = await YoutubeTranscript.fetchTranscript(video.videoId);
+      const transcript = await YoutubeTranscript.fetchTranscript(url);
       transcriptText = transcript.map(t => t.text).join(" ");
     } catch (err) {
-      console.log("Transcript not available");
+      // Transcript might not be available
     }
 
     const description = video.description?.trim() || "";
@@ -36,9 +35,7 @@ export const extractYoutube = async (url) => {
     };
 
   } catch (error) {
-
-    console.log("Youtube extraction error:", error.message);
+    console.error("Youtube extraction error:", error.message);
     return null;
-
   }
 };

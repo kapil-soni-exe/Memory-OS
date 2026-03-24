@@ -19,7 +19,8 @@ export const extractPDF = async (source) => {
     } else if (typeof source === "string" && (source.startsWith("http") || source.startsWith("https"))) {
       const response = await axios.get(source, {
         responseType: "arraybuffer",
-        headers: { "User-Agent": "Mozilla/5.0" }
+        headers: { "User-Agent": "Mozilla/5.0" },
+        timeout: 20000 // 20 second timeout
       });
       buffer = Buffer.from(response.data);
     } else if (typeof source === "string") {

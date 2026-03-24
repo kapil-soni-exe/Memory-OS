@@ -1,11 +1,13 @@
 import { CohereClient } from "cohere-ai";
+import dotenv from "dotenv";
+dotenv.config();
 
 const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY
 });
 
 // Generate embedding vector for semantic search
-export const generateEmbedding = async (text) => {
+export const generateEmbedding = async (text, inputType = "search_document") => {
   try {
 
     // Guard: prevent empty embedding requests
@@ -19,7 +21,7 @@ export const generateEmbedding = async (text) => {
     const response = await cohere.embed({
       model: "embed-english-v3.0",
       texts: [inputText],
-      inputType: "search_document"
+      inputType: inputType
     });
 
     return response.embeddings?.[0] || null;

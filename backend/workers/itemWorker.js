@@ -10,39 +10,64 @@ import { detectClusterByEmbedding } from "../services/ai/clusterService.js";
 import { findRelatedItems } from "../services/ai/findRelatedItems.js";
 import { handleTopic } from "../services/topic.service.js";
 
+import { extractKnowledge } from "../services/ai/nexus/knowledgeExtractor.js";
+
 /**
  * Background Worker for Item Processing
  * Handles:
- * 1. AI Content Enrichment (Tags/Summary)
- * 2. Semantic Embedding Generation
+ * 1. AI Content Enrichment (Structured Knowledge: Tags/Summary/Entities/Relationships)
+ * 2. Semantic Embedding Generation (Knowledge-Centric)
  * 3. Qdrant Vector DB Indexing
  * 4. Cluster Detection & Topic Linkage
  */
 const itemWorker = new Worker('item-processing', async (job) => {
   const { itemId, userId } = job.data;
-  console.log(`[Worker] Processing item: ${itemId} for user: ${userId}`);
 
   try {
     const item = await Item.findById(itemId);
     if (!item) throw new Error("Item not found");
 
-    // --- PHASE 1: AI Enrichment ---
-    // Extracting core topics and generating a concise summary
+    // --- PHASE 1: Structured Knowledge Extraction (with Fallback) ---
     const aiContent = item.content.slice(0, 2000);
-    const [tagsResult, summaryResult] = await Promise.all([
-      generateTagsForContent(item.title, aiContent),
-      item.content.length > 50
-        ? generateAISummary(item.title, aiContent)
-        : ""
-    ]);
+    let summary, tags, entities, relationships;
 
-    // --- PHASE 2: Vector Search Integration ---
-    // Preparing text for the embedding model (Combining title, summary, and tags)
+    try {
+      const knowledge = await extractKnowledge(item.title, aiContent);
+      summary = knowledge.summary;
+      tags = knowledge.tags;
+      entities = knowledge.entities;
+      relationships = knowledge.relationships;
+    } catch (err) {
+      console.error(`[Worker] Knowledge extraction failed, using fallback: ${err.message}`);
+      [tags, summary] = await Promise.all([
+        generateTagsForContent(item.title, aiContent),
+        item.content.length > 50 ? generateAISummary(item.title, aiContent) : ""
+      ]);
+      entities = [];
+      relationships = [];
+    }
+
+    // --- PHASE 2: Knowledge-Centric Embedding ---
+    // Structured format ensures the vector captures the core semantic essence
     const embeddingText = `
-${item.title}
-${summaryResult || ""}
-${(tagsResult || []).join(" ")}
-`;
+Title: ${item.title}
+
+Summary:
+${summary}
+
+Tags:
+${(tags || []).join(", ")}
+
+Entities:
+${(entities || []).join(", ")}
+
+Relationships:
+${(relationships || [])
+  .map(r => `${r.source} ${r.relation} ${r.target}`)
+  .join(". ")
+}
+`.trim();
+
     const embedding = await generateEmbedding(embeddingText);
     
     let vectorId = null;
@@ -63,7 +88,7 @@ ${(tagsResult || []).join(" ")}
           payload: {
             itemId: item._id.toString(),
             title: item.title,
-            summary: summaryResult,
+            summary: summary,
             user: userId,
             clusterId
           },
@@ -78,22 +103,24 @@ ${(tagsResult || []).join(" ")}
         userId,
         clusterId,
         itemId: item._id,
-        tags: tagsResult || []
+        tags: tags || []
       }).catch(err => console.error("[Worker] Topic sync error:", err.message));
     }
 
     // --- PHASE 3: DB Finalization ---
     // Mark item as 'completed' so it displays correctly on the frontend
     await Item.findByIdAndUpdate(itemId, {
-      tags: tagsResult || [],
-      summary: summaryResult || "",
+      tags: tags || [],
+      summary: summary || "",
+      entities: entities || [],
+      relationships: relationships || [],
       vectorId,
       clusterId,
       relatedItems: relatedIds,
       processingStatus: "completed"
     });
 
-    console.log(`[Worker] Item processed successfully: ${itemId}`);
+    // (Log removed for production)
   } catch (error) {
     console.error(`[Worker] Error processing item ${itemId}:`, error.message);
     await Item.findByIdAndUpdate(itemId, { processingStatus: "failed" });
@@ -103,7 +130,5 @@ ${(tagsResult || []).join(" ")}
   connection: redisConnection,
   concurrency: 3
 });
-
-console.log('BullMQ Worker started: item-processing');
 
 export default itemWorker;

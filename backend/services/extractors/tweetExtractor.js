@@ -5,7 +5,7 @@ export const extractTweet = async (url) => {
 
     const api = `https://publish.twitter.com/oembed?url=${encodeURIComponent(url)}`;
 
-    const response = await axios.get(api);
+    const response = await axios.get(api, { timeout: 10000 });
 
     const html = response.data.html;
 
@@ -31,9 +31,7 @@ export const extractTweet = async (url) => {
     };
 
   } catch (error) {
-
-    console.log("Tweet extraction error:", error.message);
+    console.error("Tweet extraction error:", error.message);
     return null;
-
   }
 };

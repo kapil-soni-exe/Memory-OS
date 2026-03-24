@@ -10,8 +10,13 @@ import nexusRoutes from "./routes/nexus.routes.js"
 import helmet from "helmet"
 import morgan from "morgan"
 import { authRateLimiter, globalRateLimiter } from "./middleware/rateLimit.middleware.js"
+import path from "path"
+import { fileURLToPath } from "url"
 import errorMiddleware from "./middleware/error.middleware.js"
- 
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 const app = express()
 
 // Security Headers
@@ -24,7 +29,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // Global API Rate Limiting
-app.use(globalRateLimiter)
+// app.use(globalRateLimiter)
 
 app.use(express.json())
 app.use(cors({
@@ -33,8 +38,11 @@ app.use(cors({
 }))
 app.use(cookieParser())
 
+// Serve static files from uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")))
+
 // Specific Rate Limiting for Auth
-app.use("/api/auth", authRateLimiter)
+// app.use("/api/auth", authRateLimiter)
 app.use("/api/auth", authRoutes)
 app.use("/api/items", itemRoutes)
 app.use("/api/search", searchRoutes)

@@ -1,18 +1,13 @@
 import Item from "../models/item.model.js";
 import { extractContentFromUrl } from "../services/contentExtractor.js";
 import { cleanContent } from "../utils/contentCleaner.js";
-import { generateTagsForContent } from "../services/ai/tag/tagGenerator.js";
-import { generateAISummary } from "../services/ai/generateAISummary.js";
-import { generateEmbedding } from "../services/ai/embeddingService.js";
-import { v4 as uuidv4 } from "uuid";
 import qdrant from "../config/qdrant.js"
 import { detectContentType } from "../services/contentTypeDetector.js";
-import { findRelatedItems } from "../services/ai/findRelatedItems.js";
-import { detectClusterByEmbedding } from "../services/ai/clusterService.js";
-import { handleTopic } from "../services/topic.service.js";
 
 import { classifyNexusCapture } from "../services/ai/nexusCaptureService.js";
 import { itemQueue } from "../config/queue.js";
+import { extractImage } from "../services/extractors/imageExtractor.js";
+import { extractPDF } from "../services/extractors/pdfExtractor.js";
 
 // Create Item (Magic Capture)
 /**
@@ -25,51 +20,79 @@ export const saveItem = async (req, res) => {
     const { url, content, type, relatedItems, input: nexusInput } = req.body;
     const input = (nexusInput || url || content || "").trim();
 
-    if (!input) {
-      return res.status(400).json({ message: "Content is required" });
-    }
-
-    // Smart URL Detection: Checks if input looks like a valid web address
-    const isUrl = input.startsWith("http") || 
-                  /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9](?:\/.*)?$/i.test(input);
-
     let finalItemData = {
       user: req.user,
       relatedItems,
       processingStatus: "processing"
     };
 
-    if (isUrl) {
-      // Logic for capturing and parsing web links
-      const cleanUrl = input.startsWith("http") ? input : `https://${input}`;
-      const tempType = detectContentType(cleanUrl, type);
-      const extractData = await extractContentFromUrl(cleanUrl, tempType);
-      
-      const rawContent = extractData?.content || "";
-      const finalTitle = extractData?.title || "Untitled Wall";
-      const finalType = detectContentType(cleanUrl, type, rawContent);
-      
-      finalItemData = {
-        ...finalItemData,
-        title: finalTitle,
-        url: cleanUrl,
-        content: cleanContent(rawContent),
-        type: finalType,
-        author: extractData?.author,
-        image: extractData?.image,
-        source: "web"
-      };
+    // Handle File Upload
+    if (req.file) {
+      const filePath = req.file.path;
+      const fileUrl = `/uploads/${req.file.filename}`;
+      const mimeType = req.file.mimetype;
+
+      let extractedData = null;
+
+      if (mimeType.startsWith("image/")) {
+        extractedData = await extractImage(filePath);
+        finalItemData = {
+          ...finalItemData,
+          title: extractedData.title,
+          content: extractedData.content,
+          type: "image",
+          image: fileUrl,
+          source: "manual"
+        };
+      } else if (mimeType === "application/pdf") {
+        extractedData = await extractPDF(filePath);
+        finalItemData = {
+          ...finalItemData,
+          title: extractedData.title,
+          content: extractedData.content,
+          type: "pdf",
+          url: fileUrl,
+          source: "manual"
+        };
+      }
+    } else if (input) {
+      // Existing Logic for URL or Nexus Capture
+      // Smart URL Detection
+      const isUrl = input.startsWith("http") ||
+        /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9](?:\/.*)?$/i.test(input);
+
+      if (isUrl) {
+        const cleanUrl = input.startsWith("http") ? input : `https://${input}`;
+        const tempType = detectContentType(cleanUrl, type);
+        const extractData = await extractContentFromUrl(cleanUrl, tempType);
+
+        const rawContent = extractData?.content || "";
+        const finalTitle = extractData?.title || "Untitled Wall";
+        const finalType = detectContentType(cleanUrl, type, rawContent);
+
+        finalItemData = {
+          ...finalItemData,
+          title: finalTitle,
+          url: cleanUrl,
+          content: cleanContent(rawContent),
+          type: finalType,
+          author: extractData?.author,
+          image: extractData?.image,
+          source: "web"
+        };
+      } else {
+        const nexusData = await classifyNexusCapture(input);
+
+        finalItemData = {
+          ...finalItemData,
+          title: nexusData.title,
+          content: input,
+          type: nexusData.type,
+          source: "manual"
+        };
+      }
     } else {
-      // Logic for processing raw thoughts/notes using AI classification
-      const nexusData = await classifyNexusCapture(input);
-      
-      finalItemData = {
-        ...finalItemData,
-        title: nexusData.title,
-        content: input,
-        type: nexusData.type,
-        source: "manual"
-      };
+      return res.status(400).json({ message: "Content or file is required" });
     }
 
     // Initial Save to MongoDB
@@ -99,7 +122,12 @@ export const saveItem = async (req, res) => {
  */
 export const getAllItems = async (req, res) => {
   try {
-    const items = await Item.find({ user: req.user }).sort({ createdAt: -1 });
+    // Optimization: Exclude large 'content' field for list view
+    const items = await Item.find({ user: req.user })
+      .select("-content")
+      .sort({ createdAt: -1 })
+      .lean();
+
     res.status(200).json({
       items,
     });
@@ -148,14 +176,24 @@ export const deleteItem = async (req, res) => {
     }
 
     // 1. Sync with Vector Database (Qdrant)
-    if (item.vectorId) {
-      try {
+    try {
+      if (item.vectorId) {
         await qdrant.delete("items_vectors", {
           points: [item.vectorId],
         });
-      } catch (qdrantError) {
-        console.error("Failed to delete vector from Qdrant:", qdrantError.message);
       }
+      
+      // Secondary safety check: delete by itemId payload to ensure no orphans
+      await qdrant.delete("items_vectors", {
+        filter: {
+          must: [{
+            key: "itemId",
+            match: { value: item._id.toString() }
+          }]
+        }
+      });
+    } catch (qdrantError) {
+      console.error("Failed to delete vector from Qdrant:", qdrantError.message);
     }
 
     // 2. Sync with Topic Engine
@@ -163,7 +201,7 @@ export const deleteItem = async (req, res) => {
       try {
         const Topic = (await import("../models/topic.model.js")).default;
         const topic = await Topic.findOne({ user: req.user, clusterId: item.clusterId });
-        
+
         if (topic) {
           if (topic.itemCount > 1) {
             topic.itemCount -= 1;
