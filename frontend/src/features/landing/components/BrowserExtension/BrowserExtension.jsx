@@ -51,9 +51,9 @@ const BrowserExtension = () => (
           </div>
 
           <a
-            href="/memoryos-extension.zip"
-            download="memoryos-extension.zip"
-            className="ext__cta"
+            href="/extension.zip"
+            download="extension.zip"
+            className="download-btn-primary"
           >
             <MousePointerClick size={16} strokeWidth={2} />
             Download Extension — free

@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch(`${CONFIG.API_URL}/items/extract`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify({ url: tab.url })
     });
 
@@ -54,6 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       const resp = await fetch(`${CONFIG.API_URL}/items/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           url: tab.url,
           title: titlePreview.textContent,
