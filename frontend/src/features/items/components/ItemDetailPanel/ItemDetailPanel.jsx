@@ -105,7 +105,7 @@ const ItemDetailPanel = ({ item: initialItem, isOpen, onClose, onDelete }) => {
           {loading && <div className="panel-loader">Updating intelligence...</div>}
           
           <div className="panel-meta">
-            <span className="source-badge">{item?.source || item?.type}</span>
+            <span className="source-badge">{item?.type}</span>
             <div className="meta-row">
               <div className="meta-item">
                 <Calendar size={14} />

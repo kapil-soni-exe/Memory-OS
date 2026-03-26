@@ -15,7 +15,7 @@ const SavedItemCard = ({ item, onDelete }) => {
         <Trash2 size={12} />
       </button>
       <div className="card-header">
-        <span className="source-label">{item.source || item.type}</span>
+        <span className="source-label">{item.type}</span>
       </div>
 
       <div className={`card-media ${!item.image ? 'no-image' : ''}`}>
