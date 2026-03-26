@@ -238,8 +238,8 @@ body::before {
   top: 0;
   left: 0;
   width: 100%;
-  height: 200px;
-  background: radial-gradient(circle at 50% -20%, rgba(127, 90, 240, 0.15), rgba(0, 122, 255, 0.08), transparent 70%);
+  height: 50vh;
+  background: radial-gradient(circle at 50% -10%, rgba(0, 122, 255, 0.25) 0%, rgba(127, 90, 240, 0.15) 35%, transparent 80%);
   pointer-events: none;
   z-index: 0;
 }

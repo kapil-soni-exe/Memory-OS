@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import AuthLayout from '../../layouts/AuthLayout/AuthLayout';
@@ -5,8 +6,15 @@ import { useAuth } from '../../features/auth/hooks/useAuth';
 import './Login.css';
 
 const Login = () => {
-  const { login, loading, error } = useAuth();
+  const { login, loading, error, user, authenticated } = useAuth();
   const navigate = useNavigate();
+
+  // Auto-redirect if already logged in
+  useEffect(() => {
+    if (authenticated || user) {
+      navigate('/home');
+    }
+  }, [authenticated, user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

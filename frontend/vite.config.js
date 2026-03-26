@@ -16,7 +16,7 @@ export default defineConfig({
         start_url: '/login',
         theme_color: '#7F5AF0',
         background_color: '#000000',
-        display: 'fullscreen',
+        display: 'standalone',
         orientation: 'portrait',
         categories: ['productivity', 'utilities'],
         shortcuts: [
