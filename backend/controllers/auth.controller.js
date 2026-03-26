@@ -37,12 +37,14 @@ import User from "../models/user.model.js"
       { expiresIn: "7d" }
     );
 
-    res.cookie("token", token, {
+    const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: true, // Always true for SameSite: none
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000
-    });
+    };
+
+    res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
       message: "Welcome to MemoryOS!",
@@ -82,12 +84,14 @@ export const loginUser = async (req, res) => {
             { expiresIn: "7d" }
         );
 
-        res.cookie("token", token, {
+        const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000
-        });
+        };
+
+        res.cookie("token", token, cookieOptions);
 
         res.status(200).json({
             message: "Successfully logged in",
@@ -109,7 +113,11 @@ export const loginUser = async (req, res) => {
  */
 export const logoutUser = async (req, res) => {
     try {
-        res.clearCookie("token");
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        });
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed" });
