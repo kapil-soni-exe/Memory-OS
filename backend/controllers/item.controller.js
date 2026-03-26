@@ -15,10 +15,55 @@ import { extractPDF } from "../services/extractors/pdfExtractor.js";
  * Decides whether the input is a URL (Web Capture) or raw text (Nexus Capture).
  * Offloads heavy AI Tasks (Summary, Tags, Embeddings) to BullMQ.
  */
+export const extractItem = async (req, res) => {
+  try {
+    const { url, content, type } = req.body;
+    const input = (url || content || "").trim();
+
+    if (!input) {
+      return res.status(400).json({ message: "Content or URL is required" });
+    }
+
+    const isUrl = input.startsWith("http") ||
+      /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9](?:\/.*)?$/i.test(input);
+
+    if (isUrl) {
+      const cleanUrl = input.startsWith("http") ? input : `https://${input}`;
+      const tempType = detectContentType(cleanUrl, type);
+      const extractData = await extractContentFromUrl(cleanUrl, tempType);
+
+      return res.status(200).json({
+        ...extractData,
+        content: cleanContent(extractData?.content || ""),
+        type: detectContentType(cleanUrl, type, extractData?.content)
+      });
+    } else {
+      // Manual/Nexus Capture
+      const nexusData = await classifyNexusCapture(input);
+      return res.status(200).json({
+        ...nexusData,
+        content: input
+      });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const saveItem = async (req, res) => {
   try {
-    const { url, content, type, relatedItems, input: nexusInput } = req.body;
-    const input = (nexusInput || url || content || "").trim();
+    const { 
+      url: providedUrl, 
+      content: providedContent, 
+      title: providedTitle, 
+      type: providedType, 
+      tags: providedTags,
+      summary: providedSummary,
+      image: providedImage,
+      author: providedAuthor,
+      source: providedSource,
+      relatedItems 
+    } = req.body;
 
     let finalItemData = {
       user: req.user,
@@ -26,8 +71,23 @@ export const saveItem = async (req, res) => {
       processingStatus: "processing"
     };
 
-    // Handle File Upload
-    if (req.file) {
+    // 1. If user provided pre-extracted data (Confirmed Save from Preview)
+    if (providedTitle && (providedUrl || providedContent)) {
+      finalItemData = {
+        ...finalItemData,
+        title: providedTitle,
+        url: providedUrl,
+        content: cleanContent(providedContent || ""),
+        type: providedType || "note",
+        tags: providedTags || [],
+        summary: providedSummary,
+        image: providedImage,
+        author: providedAuthor,
+        source: providedSource || "manual"
+      };
+    } 
+    // 2. Handle File Upload
+    else if (req.file) {
       const filePath = req.file.path;
       const fileUrl = `/uploads/${req.file.filename}`;
       const mimeType = req.file.mimetype;
@@ -57,34 +117,34 @@ export const saveItem = async (req, res) => {
           source: "manual"
         };
       }
-    } else if (input) {
-      // Existing Logic for URL or Nexus Capture
-      // Smart URL Detection
+    } 
+    // 3. Fallback: Quick Save (direct capture without explicit preview)
+    else {
+      const input = (providedUrl || providedContent || "").trim();
+      if (!input) {
+        return res.status(400).json({ message: "Content or URL is required" });
+      }
+
       const isUrl = input.startsWith("http") ||
         /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9](?:\/.*)?$/i.test(input);
 
       if (isUrl) {
         const cleanUrl = input.startsWith("http") ? input : `https://${input}`;
-        const tempType = detectContentType(cleanUrl, type);
+        const tempType = detectContentType(cleanUrl, providedType);
         const extractData = await extractContentFromUrl(cleanUrl, tempType);
-
-        const rawContent = extractData?.content || "";
-        const finalTitle = extractData?.title || "Untitled Wall";
-        const finalType = detectContentType(cleanUrl, type, rawContent);
 
         finalItemData = {
           ...finalItemData,
-          title: finalTitle,
+          title: extractData?.title || "Untitled",
           url: cleanUrl,
-          content: cleanContent(rawContent),
-          type: finalType,
+          content: cleanContent(extractData?.content || ""),
+          type: detectContentType(cleanUrl, providedType, extractData?.content),
           author: extractData?.author,
           image: extractData?.image,
           source: "web"
         };
       } else {
         const nexusData = await classifyNexusCapture(input);
-
         finalItemData = {
           ...finalItemData,
           title: nexusData.title,
@@ -93,8 +153,6 @@ export const saveItem = async (req, res) => {
           source: "manual"
         };
       }
-    } else {
-      return res.status(400).json({ message: "Content or file is required" });
     }
 
     // Initial Save to MongoDB

@@ -3,32 +3,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   const titlePreview = document.getElementById("title-preview");
   const urlPreview = document.getElementById("url-preview");
   const saveBtn = document.getElementById("save-btn");
+  const discardBtn = document.getElementById("discard-btn");
   const statusEl = document.getElementById("status-message");
   const tagsInput = document.getElementById("tags");
   const summaryInput = document.getElementById("summary");
 
-  // Get metadata from content script
+  let extractedData = null;
+
+  // Initialize UI
+  titlePreview.textContent = "Analyzing Memory...";
+  urlPreview.textContent = new URL(tab.url).hostname;
+  saveBtn.disabled = true;
+
+  // 1. PHASE 1: Extraction (Server-side for high fidelity)
   try {
-    const [response] = await chrome.tabs.sendMessage(tab.id, { action: "extract-metadata" });
-    if (response) {
-      titlePreview.textContent = response.title;
-      urlPreview.textContent = new URL(response.url).hostname;
-      if (response.description) {
-        summaryInput.value = response.description;
-      }
-      if (response.selection) {
-        summaryInput.value = `Highlight: "${response.selection}"\n\n${summaryInput.value}`;
-      }
-    }
+    const response = await fetch(`${CONFIG.API_URL}/items/extract`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: tab.url })
+    });
+
+    if (!response.ok) throw new Error("Extraction failed");
+    
+    extractedData = await response.json();
+    
+    titlePreview.textContent = extractedData.title;
+    summaryInput.value = extractedData.content.slice(0, 200) + "..."; // Show snippet
+    saveBtn.disabled = false;
   } catch (err) {
-    // If content script not loaded (e.g. chrome:// urls)
+    console.warn("Server extraction failed, falling back to local metadata.");
+    // Fallback constant title
     titlePreview.textContent = tab.title;
-    urlPreview.textContent = new URL(tab.url).hostname;
+    saveBtn.disabled = false;
   }
 
+  // DISCARD action
+  discardBtn.addEventListener("click", () => {
+    window.close();
+  });
+
+  // SAVE action
   saveBtn.addEventListener("click", async () => {
     saveBtn.disabled = true;
-    saveBtn.querySelector(".btn-text").textContent = "Capturing...";
+    saveBtn.querySelector(".btn-text").textContent = "Saving...";
     
     const tags = tagsInput.value.split(',').map(t => t.trim()).filter(t => t);
     const summary = summaryInput.value;
@@ -40,8 +57,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         body: JSON.stringify({
           url: tab.url,
           title: titlePreview.textContent,
+          content: extractedData?.content || "", // Send the full content we extracted
           summary: summary || "Captured via MemoryOS Extension",
           tags: tags.length > 0 ? tags : ["extension-save"],
+          image: extractedData?.image,
+          author: extractedData?.author,
+          type: extractedData?.type || "web",
           source: new URL(tab.url).hostname
         })
       });
@@ -50,7 +71,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         statusEl.textContent = "Memory Added Successfully! ✨";
         statusEl.style.color = "#2cb67d";
         saveBtn.querySelector(".btn-text").textContent = "Saved!";
-        
         setTimeout(() => window.close(), 1500);
       } else {
         throw new Error("Server rejected save");
@@ -62,4 +82,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       saveBtn.querySelector(".btn-text").textContent = "Try Again";
     }
   });
+
+  // Open Dashboard link
+  const dashboardLink = document.getElementById("open-dashboard");
+  if (dashboardLink) {
+    dashboardLink.addEventListener("click", () => {
+      chrome.tabs.create({ url: CONFIG.DASHBOARD_URL });
+    });
+  }
 });

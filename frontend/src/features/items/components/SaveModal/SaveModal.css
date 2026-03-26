@@ -261,6 +261,33 @@
   cursor: pointer;
 }
 
+.preview-snippet {
+  background: var(--color-surface-sunken);
+  padding: var(--sp-4);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--color-border);
+}
+
+.preview-snippet label {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.preview-snippet p {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .refinement-footer {
   display: flex;
   gap: var(--sp-4);

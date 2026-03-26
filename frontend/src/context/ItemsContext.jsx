@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { getItems, saveItem, deleteItem, updateItem } from '../features/items/services/item.api';
+import { getItems, saveItem, deleteItem, updateItem, extractContent } from '../features/items/services/item.api';
 
 export const ItemsContext = createContext();
 
@@ -88,6 +88,7 @@ export const ItemsProvider = ({ children }) => {
       addItem, 
       editItem, 
       removeItem, 
+      extractContent,
       refetch: fetchItems 
     }}>
       {children}

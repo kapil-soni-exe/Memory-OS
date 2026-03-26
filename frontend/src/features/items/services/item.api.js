@@ -15,6 +15,11 @@ export const saveItem = async (itemData) => {
   return response.data;
 };
 
+export const extractContent = async (input) => {
+  const response = await apiClient.post('/items/extract', input);
+  return response.data;
+};
+
 
 export const updateItem = async (id, data) => {
   const response = await apiClient.put(`/items/${id}`, data);

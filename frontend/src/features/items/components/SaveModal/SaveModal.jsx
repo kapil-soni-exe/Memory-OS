@@ -8,14 +8,13 @@ const SaveModal = ({ isOpen, onClose }) => {
   const [view, setView] = useState('input'); // input, processing, review
   const [formData, setFormData] = useState({ input: '' });
   const [processStep, setProcessStep] = useState(0);
-  const [savedItem, setSavedItem] = useState(null);
+  const { addItem, extractContent } = useItems();
+  const [previewItem, setPreviewItem] = useState(null);
   
-  const { addItem, editItem } = useItems();
-
   const steps = [
-    { icon: Search, text: "Nexus is thinking..." },
-    { icon: Brain, text: "Classifying your knowledge..." },
-    { icon: Zap, text: "Organizing in your galaxy..." }
+    { icon: Search, text: "Nexus is scanning..." },
+    { icon: Brain, text: "Extracting intelligence..." },
+    { icon: Zap, text: "Preparing your preview..." }
   ];
 
   // Sync process steps during loading
@@ -33,7 +32,7 @@ const SaveModal = ({ isOpen, onClose }) => {
     setView('input');
     setProcessStep(0);
     setFormData({ input: '' });
-    setSavedItem(null);
+    setPreviewItem(null);
   };
 
   const handleInitialSubmit = async (e) => {
@@ -42,21 +41,32 @@ const SaveModal = ({ isOpen, onClose }) => {
     
     setView('processing');
     try {
-      let submitData;
+      let data;
       if (formData.file) {
-        submitData = new FormData();
-        submitData.append('file', formData.file);
-        if (formData.input) submitData.append('input', formData.input);
+        // For files, we still use addItem directly (as standard upload flow)
+        // because we don't have a dedicated "file extract" preview yet
+        const item = await addItem(formData);
+        setPreviewItem(item);
+        setTimeout(() => setView('review'), 1000);
       } else {
-        submitData = formData;
+        // For URLs and text, we use the NEW extraction flow
+        const result = await extractContent({ 
+          url: formData.input.startsWith('http') ? formData.input : undefined,
+          content: !formData.input.startsWith('http') ? formData.input : undefined
+        });
+        
+        setPreviewItem({
+          ...result,
+          title: result.title,
+          type: result.type,
+          content: result.content,
+          url: formData.input.startsWith('http') ? formData.input : undefined
+        });
+        
+        setTimeout(() => setView('review'), 1200);
       }
-
-      const item = await addItem(submitData);
-      setSavedItem(item);
-      // Give time for the animation to look natural
-      setTimeout(() => setView('review'), 1000);
     } catch (err) {
-      console.error("Save failed:", err);
+      console.error("Extraction failed:", err);
       setView('input');
       setProcessStep(0);
     }
@@ -65,14 +75,19 @@ const SaveModal = ({ isOpen, onClose }) => {
   const handleRefine = async (e) => {
     e.preventDefault();
     try {
-      await editItem(savedItem._id, {
-        title: savedItem.title,
-        type: savedItem.type
-      });
-      onClose();
-      setTimeout(resetForm, 500);
+      // If it's already saved (file upload flow), we update
+      if (previewItem._id) {
+        // file logic: item already exists in DB
+        onClose();
+        setTimeout(resetForm, 500);
+      } else {
+        // preview logic: item NOT in DB yet
+        await addItem(previewItem);
+        onClose();
+        setTimeout(resetForm, 500);
+      }
     } catch (err) {
-      console.error("Refinement failed:", err);
+      console.error("Save failed:", err);
     }
   };
 
@@ -86,7 +101,7 @@ const SaveModal = ({ isOpen, onClose }) => {
             <div className="brand-group">
               <Sparkles className="brand-icon" size={20} />
               <h2 className="panel-title">
-                {view === 'review' ? 'Review Knowledge' : 'New Knowledge'}
+                {view === 'review' ? 'Preview Memory' : 'New Memory'}
               </h2>
             </div>
             <button className="panel-close-btn" onClick={onClose}>
@@ -94,7 +109,7 @@ const SaveModal = ({ isOpen, onClose }) => {
             </button>
           </div>
           <p className="panel-subtitle">
-            {view === 'review' ? 'AI has organized your discovery. Adjust if needed.' : 'Capture information and let AI organize it.'}
+            {view === 'review' ? 'Nexus has extracted the essence. Customize before saving.' : 'Add a URL or note to your digital consciousness.'}
           </p>
         </div>
 
@@ -108,7 +123,7 @@ const SaveModal = ({ isOpen, onClose }) => {
                 </div>
               </div>
               <div className="processing-details">
-                <h3 className="processing-title">Nexus is working</h3>
+                <h3 className="processing-title">Nexus is scanning</h3>
                 <p className="processing-step-text">{steps[processStep].text}</p>
                 <div className="process-progress-bar">
                   <div
@@ -129,13 +144,13 @@ const SaveModal = ({ isOpen, onClose }) => {
             />
           )}
 
-          {view === 'review' && savedItem && (
+          {view === 'review' && previewItem && (
             <div className="refinement-view">
               <div className="refinement-header">
                 <div className="success-icon-wrapper">
                   <Check size={32} />
                 </div>
-                <h3 className="refinement-title">Knowledge Captured</h3>
+                <h3 className="refinement-title">Preview Extracted</h3>
               </div>
 
               <form className="refinement-form" onSubmit={handleRefine}>
@@ -144,8 +159,9 @@ const SaveModal = ({ isOpen, onClose }) => {
                   <input 
                     type="text" 
                     className="refinement-input"
-                    value={savedItem.title}
-                    onChange={(e) => setSavedItem({...savedItem, title: e.target.value})}
+                    value={previewItem.title}
+                    onChange={(e) => setPreviewItem({...previewItem, title: e.target.value})}
+                    placeholder="Enter title"
                   />
                 </div>
 
@@ -153,8 +169,8 @@ const SaveModal = ({ isOpen, onClose }) => {
                   <label>Type</label>
                   <select 
                     className="refinement-select"
-                    value={savedItem.type}
-                    onChange={(e) => setSavedItem({...savedItem, type: e.target.value})}
+                    value={previewItem.type}
+                    onChange={(e) => setPreviewItem({...previewItem, type: e.target.value})}
                   >
                     {["article", "video", "tweet", "pdf", "image", "note", "thought", "book", "task", "quote", "code"].map(t => (
                       <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
@@ -162,9 +178,17 @@ const SaveModal = ({ isOpen, onClose }) => {
                   </select>
                 </div>
 
+                <div className="preview-snippet">
+                   <label>Content Preview</label>
+                   <p>{previewItem.content?.slice(0, 200)}...</p>
+                </div>
+
                 <div className="refinement-footer">
-                  <button type="submit" className="refine-btn">Organize in Galaxy</button>
-                  <button type="button" className="cancel-btn" onClick={onClose}>Discard</button>
+                  <button type="submit" className="refine-btn">Confirm & Save</button>
+                  <button type="button" className="cancel-btn" onClick={() => {
+                     onClose();
+                     setTimeout(resetForm, 500);
+                  }}>Discard</button>
                 </div>
               </form>
             </div>
