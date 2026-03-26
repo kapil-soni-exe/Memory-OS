@@ -8,7 +8,7 @@ const redisConnection = new Redis(process.env.REDIS_URL || 'redis://127.0.0.1:63
 });
 
 redisConnection.on('connect', () => {
-  // Connected
+  console.log('✅ [Redis] Connected successfully');
 });
 
 redisConnection.on('error', (err) => {

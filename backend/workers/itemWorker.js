@@ -147,4 +147,6 @@ ${(relationships || [])
   concurrency: 5
 });
 
+console.log('✅ [Worker] Background processor started and ready');
+
 export default itemWorker;
