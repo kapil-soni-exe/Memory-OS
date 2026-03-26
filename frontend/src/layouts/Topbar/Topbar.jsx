@@ -1,5 +1,5 @@
 import { useNavigate, Link } from "react-router-dom";
-import { Search, Plus, Bell, Sun, Moon } from "lucide-react";
+import { Plus, Bell, Sun, Moon } from "lucide-react";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import "./Topbar.css";
@@ -19,18 +19,7 @@ const Topbar = ({ onSaveClick }) => {
         </Link>
       </div>
 
-      {/* Left side (Desktop Search) */}
-      <div className="topbar-left">
-        <div className="global-search-wrapper">
-          <Search size={16} className="search-icon" />
-
-          <input
-            type="text"
-            placeholder="Global search..."
-            className="global-search-input"
-          />
-        </div>
-      </div>
+      <div className="topbar-spacer"></div>
 
       {/* Right side */}
       <div className="topbar-right">

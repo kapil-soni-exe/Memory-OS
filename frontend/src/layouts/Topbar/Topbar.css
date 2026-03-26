@@ -13,43 +13,8 @@
   z-index: 50;
 }
 
-.topbar-left {
+.topbar-spacer {
   flex: 1;
-  max-width: 400px;
-  margin-right: auto;
-}
-
-.topbar-mobile-logo {
-  display: none;
-}
-
-.global-search-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.global-search-wrapper .search-icon {
-  position: absolute;
-  left: var(--sp-4);
-  color: var(--color-text-tertiary);
-}
-
-.global-search-input {
-  width: 100%;
-  background: var(--color-surface-sunken);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: var(--sp-2) var(--sp-4) var(--sp-2) var(--sp-12);
-  font-size: var(--text-sm);
-  transition: all var(--ease-base);
-}
-
-.global-search-input:focus {
-  outline: none;
-  border-color: #007AFF;
-  background: var(--color-surface);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
 }
 
 .topbar-right {
