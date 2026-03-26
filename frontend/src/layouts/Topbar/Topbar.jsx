@@ -11,14 +11,6 @@ const Topbar = ({ onSaveClick }) => {
 
   return (
     <header className="topbar">
-
-      {/* Mobile Logo */}
-      <div className="topbar-mobile-logo">
-        <Link to="/home">
-          <img src="/logo.png" alt="MemoryOS" className="mobile-logo-img" />
-        </Link>
-      </div>
-
       <div className="topbar-spacer"></div>
 
       {/* Right side */}
