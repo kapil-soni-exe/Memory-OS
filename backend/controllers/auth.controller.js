@@ -37,11 +37,13 @@ import User from "../models/user.model.js"
       { expiresIn: "7d" }
     );
 
+    const isProduction = process.env.NODE_ENV === "production";
     const cookieOptions = {
       httpOnly: true,
-      secure: true, // Always true for SameSite: none
-      sameSite: "none",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      secure: isProduction, // Secure only in production (HTTPS)
+      sameSite: isProduction ? "none" : "lax", // Lax for local, None for cross-site prod
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      partitioned: isProduction // Add partitioning for modern Chrome support
     };
 
     res.cookie("token", token, cookieOptions);
@@ -84,11 +86,13 @@ export const loginUser = async (req, res) => {
             { expiresIn: "7d" }
         );
 
+        const isProduction = process.env.NODE_ENV === "production";
         const cookieOptions = {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 7 * 24 * 60 * 60 * 1000
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            partitioned: isProduction
         };
 
         res.cookie("token", token, cookieOptions);
@@ -113,10 +117,12 @@ export const loginUser = async (req, res) => {
  */
 export const logoutUser = async (req, res) => {
     try {
+        const isProduction = process.env.NODE_ENV === "production";
         res.clearCookie("token", {
             httpOnly: true,
-            secure: true,
-            sameSite: "none"
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            partitioned: isProduction
         });
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
