@@ -2,14 +2,14 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MoreHorizontal, Filter, Trash2 } from 'lucide-react';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import Topbar from '../../components/Topbar/Topbar';
-import SavedItemCard from '../../components/SavedItemCard/SavedItemCard';
-import ItemDetailPanel from '../../components/ItemDetailPanel/ItemDetailPanel';
-import SaveModal from '../../components/SaveModal/SaveModal';
-import { getTopicById } from '../../services/topic.api';
-import useTopics from '../../hooks/useTopics';
-import useItems from '../../hooks/useItems';
+import Sidebar from '../../layouts/Sidebar/Sidebar';
+import Topbar from '../../layouts/Topbar/Topbar';
+import SavedItemCard from '../../features/items/components/SavedItemCard/SavedItemCard';
+import ItemDetailPanel from '../../features/items/components/ItemDetailPanel/ItemDetailPanel';
+import SaveModal from '../../features/items/components/SaveModal/SaveModal';
+import { getTopicById } from '../../features/items/services/topic.api';
+import useTopics from '../../features/items/hooks/useTopics';
+import useItems from '../../features/items/hooks/useItems';
 import './TopicDetail.css';
 
 const TopicDetail = () => {

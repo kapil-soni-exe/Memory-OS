@@ -1,11 +1,12 @@
 import * as React from "react";
 import { Search, Plus, Cpu, Brain, Database, Palette, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import Topbar from '../../components/Topbar/Topbar';
-import TopicCard from '../../components/TopicCard/TopicCard';
-import SaveModal from '../../components/SaveModal/SaveModal';
-import useTopics from '../../hooks/useTopics';
+import Sidebar from '../../layouts/Sidebar/Sidebar';
+import Topbar from '../../layouts/Topbar/Topbar';
+import TopicCard from '../../features/items/components/TopicCard/TopicCard';
+import SaveModal from '../../features/items/components/SaveModal/SaveModal';
+import MobileNav from "../../layouts/MobileNav/MobileNav";
+import useTopics from '../../features/items/hooks/useTopics';
 import './TopicsPage.css';
 import { useState } from 'react';
 

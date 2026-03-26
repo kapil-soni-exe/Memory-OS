@@ -93,9 +93,9 @@
 }
 
 .filter-chip.active {
-  background: #000;
-  color: #fff;
-  border-color: #000;
+  background: var(--color-btn-dark-bg);
+  color: var(--color-btn-dark-text);
+  border-color: var(--color-btn-dark-bg);
 }
 
 .saved-items-grid {
@@ -113,8 +113,47 @@
   transform: scale(0.98);
 }
 
+/* Status Messages (Loading, Searching, Empty) */
+.status-message {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-20) var(--sp-4);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+  color: var(--color-text-tertiary);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  min-height: 300px;
+}
+
+.status-message p {
+  max-width: 400px;
+}
+
 @media (max-width: 768px) {
   .saved-items-content {
-    padding: var(--sp-8) var(--sp-4) 140px;
+    padding: var(--sp-6) var(--sp-4) var(--sp-10);
+  }
+
+  .page-title {
+    font-size: var(--text-2xl);
+  }
+
+  .search-box-wrapper {
+    max-width: 100%;
+  }
+
+  .saved-search-input {
+    padding-block: var(--sp-3);
+  }
+
+  .saved-items-grid {
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
   }
 }

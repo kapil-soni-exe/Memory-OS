@@ -1,8 +1,9 @@
 .topbar {
   height: var(--nav-height);
   padding: 0 var(--sp-8);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -62,7 +63,7 @@
   align-items: center;
   gap: var(--sp-2);
   background: var(--color-btn-dark-bg);
-  color: white;
+  color: var(--color-btn-dark-text);
   padding: var(--sp-2) var(--sp-6);
   border-radius: var(--radius-full);
   font-size: var(--text-sm);
@@ -90,6 +91,14 @@
 .icon-btn:hover {
   background: var(--color-surface-sunken);
   color: var(--color-text-primary);
+}
+
+.theme-toggle {
+  color: var(--color-text-secondary);
+}
+
+.theme-toggle:hover {
+  color: var(--color-accent);
 }
 
 .user-avatar-wrapper {

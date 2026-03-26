@@ -1,10 +1,10 @@
 import React from 'react';
-import Navbar from '../../components/Navbar/Navbar';
-import Hero from '../../components/Hero/Hero';
-import HowItWorks from '../../components/HowItWorks/HowItWorks';
-import Features from '../../components/Features/Features';
-import BrowserExtension from '../../components/BrowserExtension/BrowserExtension';
-import CTA from '../../components/CTA/CTA';
+import Navbar from '../../features/landing/components/Navbar/Navbar';
+import Hero from '../../features/landing/components/Hero/Hero';
+import HowItWorks from '../../features/landing/components/HowItWorks/HowItWorks';
+import Features from '../../features/landing/components/Features/Features';
+import BrowserExtension from '../../features/landing/components/BrowserExtension/BrowserExtension';
+import CTA from '../../features/landing/components/CTA/CTA';
 import './Landing.css';
 
 const Landing = () => (

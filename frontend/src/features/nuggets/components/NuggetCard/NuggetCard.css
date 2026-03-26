@@ -1,0 +1,105 @@
+.nugget-card {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: 1.5rem;
+  overflow: hidden;
+  transition: all var(--ease-base);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.nugget-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-text-tertiary);
+  box-shadow: var(--shadow-xl);
+}
+
+.nugget-card-glow {
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 150px;
+  height: 150px;
+  filter: blur(60px);
+  opacity: 0.15;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.nugget-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.nugget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.nugget-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-surface-sunken);
+  color: var(--color-text-secondary);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--color-border);
+}
+
+.nugget-source {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+.nugget-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+.nugget-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.nugget-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--ease-fast);
+}
+
+.nugget-action-btn:hover {
+  background: var(--color-text-primary);
+  color: var(--color-surface);
+  border-color: var(--color-text-primary);
+}

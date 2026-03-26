@@ -51,7 +51,7 @@ export const generateEmbedding = async (text, inputType = "document") => {
       if (embedding && embedding.length === 1024) {
         // Save to Cache
         await redisConnection.set(cacheKey, JSON.stringify(embedding), 'EX', CACHE_TTL);
-        console.log("[Voyage AI] SUCCESS: 1024-Dim Vector generated.");
+        // Embedding generated successfully
         return embedding;
       } else {
         console.error("[Voyage AI] Dimension Mismatch or Empty Result");

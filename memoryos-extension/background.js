@@ -1,4 +1,6 @@
 // MemoryOS Background Service Worker
+importScripts('config.js');
+
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "save-to-galaxy",
@@ -15,7 +17,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
     // Send to background for processing
     try {
-      const response = await fetch("http://localhost:3000/api/items/save", {
+      const response = await fetch(`${CONFIG.API_URL}/items/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

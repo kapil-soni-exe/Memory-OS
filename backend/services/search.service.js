@@ -30,7 +30,6 @@ export const hybridSearch = async (query, userId) => {
       });
 
       console.log(`[Qdrant] Found ${vectorResults.length} raw semantic matches.`);
-      console.log("VECTOR RESULTS:", JSON.stringify(vectorResults, null, 2));
 
       const vectorIds = vectorResults.map(r => {
         const itemId = String(r.payload.itemId).trim(); // 👈 normalize
@@ -66,16 +65,10 @@ export const hybridSearch = async (query, userId) => {
   console.log(`[MongoDB] Keyword search found ${keywordItems.length} direct matches.`);
 
 
-  // Debug Logs for ID Alignment
-  console.log("---- VECTOR MAP DEBUG ----");
-  vectorScoreMap.forEach((score, id) => {
-    console.log("Map ID:", id);
-  });
 
-  vectorItems.forEach(item => {
-    const id = item._id.toString();
-    console.log("Mongo ID:", id, "Score:", vectorScoreMap.get(id));
-  });
+
+
+
 
   // 3. Merge, Score and Filter results
   const combined = [...vectorItems, ...keywordItems].map(item => {

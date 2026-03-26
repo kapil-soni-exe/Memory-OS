@@ -1,0 +1,183 @@
+/* ─── CTA Section ────────────────────────────── */
+.cta {
+  padding-block: var(--sp-32);
+  background: var(--color-bg);
+}
+
+.cta__card {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: var(--sp-24) var(--sp-16);
+  text-align: center;
+  box-shadow: var(--shadow-xl);
+}
+
+/* Ambient orbs */
+.cta__orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(60px);
+}
+
+.cta__orb--a {
+  width: 360px; height: 360px;
+  top: -140px; left: -100px;
+  background: rgba(0, 122, 255, 0.22);
+}
+
+.cta__orb--b {
+  width: 300px; height: 300px;
+  bottom: -120px; right: -80px;
+  background: rgba(247, 37, 133, 0.20);
+}
+
+.cta__orb--c {
+  width: 260px; height: 260px;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(127, 90, 240, 0.14);
+}
+
+/* Content */
+.cta__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-6);
+}
+
+/* Badge */
+.cta__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
+}
+
+/* Heading */
+.cta__heading {
+  font-size: var(--text-6xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+.cta__heading-gradient {
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtext */
+.cta__subtext {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.55);
+  line-height: var(--leading-relaxed);
+  max-width: 460px;
+}
+
+/* Buttons */
+.cta__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.cta__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.75rem 1.6rem;
+  border-radius: var(--radius-full);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  transition: all var(--ease-spring);
+  white-space: nowrap;
+}
+
+.cta__btn--white {
+  background: var(--color-btn-dark-bg);
+  color: var(--color-btn-dark-text);
+  box-shadow: var(--shadow-md);
+}
+.cta__btn--white:hover {
+  background: var(--color-surface-sunken);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cta__btn--ghost {
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+.cta__btn--ghost:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-border-strong);
+  background: var(--color-btn-ghost-bg);
+}
+
+/* Fine print */
+.cta__note {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: calc(-1 * var(--sp-2));
+}
+
+/* Social proof */
+.cta__proof {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.cta__proof-avatars { display: flex; }
+
+.cta__proof-avatar {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--color-surface-sunken);
+  margin-left: -8px;
+}
+.cta__proof-avatar:first-child { margin-left: 0; }
+
+.cta__proof-text {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.55);
+}
+.cta__proof-text strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: var(--weight-semibold);
+}
+
+/* ─── Responsive ─────────────────────────────── */
+@media (max-width: 768px) {
+  .cta { padding-block: var(--sp-20); }
+  .cta__card { padding: var(--sp-16) var(--sp-6); }
+  .cta__heading { font-size: var(--text-4xl); }
+  .cta__actions { flex-direction: column; }
+  .cta__btn { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .cta__heading { font-size: var(--text-3xl); }
+}

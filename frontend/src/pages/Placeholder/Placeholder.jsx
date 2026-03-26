@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import Topbar from '../../components/Topbar/Topbar';
+import Sidebar from '../../layouts/Sidebar/Sidebar';
+import Topbar from '../../layouts/Topbar/Topbar';
 import '../Home/Home.css';
 
 const PlaceholderPage = ({ title }) => (

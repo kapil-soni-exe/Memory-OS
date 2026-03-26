@@ -1,0 +1,311 @@
+.knowledge-graph-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-bg);
+  overflow: hidden;
+  cursor: grab;
+}
+
+.knowledge-graph-container:active {
+  cursor: grabbing;
+}
+
+.link {
+  stroke: var(--color-border);
+  stroke-opacity: 0.2;
+  stroke-width: 1px;
+  transition: stroke-opacity 0.4s ease, stroke 0.4s ease, stroke-width 0.4s ease;
+  pointer-events: none;
+}
+
+.link.highlighted {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.8;
+  stroke-width: 2px;
+}
+
+.link.dimmed {
+  stroke-opacity: 0.1;
+}
+
+.node {
+  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.node circle {
+  stroke: var(--color-bg);
+  stroke-width: 1.5px;
+  transition: r var(--ease-spring), stroke-width var(--ease-base), fill var(--ease-base), filter var(--ease-base);
+}
+
+.node.topic circle {
+  fill: #7f5af0;
+}
+
+.node.item circle {
+  fill: #007aff;
+}
+
+.node.entity circle {
+  fill: #f72585;
+}
+
+.node.tag circle {
+  fill: #2cb67d;
+}
+
+.node.dimmed {
+  opacity: 0.05;
+  filter: grayscale(1) blur(1px);
+}
+
+.node.highlighted circle {
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 2px;
+}
+
+.node.selected .node-halo {
+  stroke-opacity: 0.6;
+  animation: halo-pulse 2s infinite ease-in-out;
+  stroke-width: 2px;
+}
+
+.node.highlighted .node-halo {
+  stroke-opacity: 0.2;
+  /* No pulse for neighbors */
+}
+
+@keyframes halo-pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.1;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.6;
+  }
+
+  100% {
+    transform: scale(0.9);
+    opacity: 0.1;
+  }
+}
+
+.node.selected circle {
+  stroke: var(--color-text-primary);
+  stroke-width: 3px;
+  transform: scale(1.1);
+}
+
+.node.hovered circle {
+  transform: scale(1.2);
+  filter: brightness(1.2);
+}
+
+/* Topic → Item link: solid, stronger */
+.link.topic-link {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.35;
+  stroke-width: 1.5px;
+}
+
+.link.topic-link.highlighted {
+  stroke-opacity: 0.9;
+  stroke-width: 2.5px;
+}
+
+/* Item → Item semantic link: dashed, lighter */
+.link.semantic-link {
+  stroke: #007aff;
+  stroke-opacity: 0.12;
+  stroke-dasharray: 4 3;
+  stroke-width: 1px;
+}
+
+.link.semantic-link.highlighted {
+  stroke-opacity: 0.5;
+  stroke-width: 1.5px;
+}
+
+/* Item → Entity connection: very subtle dot */
+.link.item-entity-link {
+  stroke: var(--color-text-tertiary);
+  stroke-opacity: 0.1;
+  stroke-dasharray: 1 4;
+  stroke-width: 1px;
+}
+
+/* Entity → Entity relationship link: solid colored, with arrowhead */
+.link.relationship-link {
+  stroke: #f72585;
+  stroke-opacity: 0.25;
+  stroke-width: 1.5px;
+}
+
+.link.relationship-link.highlighted {
+  stroke-opacity: 0.8;
+  stroke-width: 2.5px;
+}
+
+/* Main Topic: brighter glow */
+.node.topic.main circle {
+  fill: #a78bfa;
+  filter: drop-shadow(0 0 10px rgba(127, 90, 240, 0.7));
+}
+
+.node.topic.main .node-halo {
+  stroke-opacity: 0.3;
+  animation: halo-pulse 2s infinite ease-in-out;
+}
+
+.node-halo {
+  fill: none;
+  stroke: #7F5AF0;
+  stroke-width: 1px;
+  stroke-opacity: 0;
+  pointer-events: none;
+  transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease;
+}
+
+.node.selected .node-halo,
+.node.highlighted .node-halo {
+  stroke-opacity: 0.3;
+  animation: halo-pulse 3s infinite ease-in-out;
+}
+
+.node.selected .node-halo {
+  stroke-opacity: 0.6;
+  stroke-width: 2px;
+}
+
+@keyframes halo-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+}
+
+.node-label {
+  font-size: 8px;
+  font-weight: 600;
+  fill: var(--color-text-primary);
+  pointer-events: none;
+  transition: opacity 0.3s ease, font-size 0.3s ease, filter 0.3s ease;
+  user-select: none;
+}
+
+.node.highlighted .node-label,
+.node.selected .node-label {
+  opacity: 1 !important;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.node.dimmed .node-label {
+  opacity: 0.1 !important;
+}
+
+/* Ensure Topic labels are slightly larger and always readable */
+.node.topic .node-label {
+  font-size: 9px;
+  fill: var(--color-bg);
+}
+
+.node.topic.selected .node-label {
+  font-size: 12px;
+}
+
+.graph-tooltip {
+  position: fixed;
+  z-index: 1000;
+  padding: var(--sp-4);
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  max-width: 240px;
+  pointer-events: none;
+  transform: translate(0, 0);
+  animation: tooltip-fade 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tooltip-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-header {
+  margin-bottom: var(--sp-2);
+}
+
+.type-badge {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.type-badge.topic {
+  background: rgba(127, 90, 240, 0.1);
+  color: #7F5AF0;
+}
+
+.type-badge.item {
+  background: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+}
+
+.type-badge.entity {
+  background: rgba(247, 37, 133, 0.1);
+  color: #f72585;
+}
+
+.type-badge.tag {
+  background: rgba(44, 182, 125, 0.1);
+  color: #2CB67D;
+}
+
+.tooltip-header h4 {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.tooltip-summary {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--sp-2);
+}
+
+.tooltip-footer {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+}

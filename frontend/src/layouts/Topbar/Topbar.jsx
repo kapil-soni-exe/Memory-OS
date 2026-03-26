@@ -1,10 +1,12 @@
 import { useNavigate, Link } from "react-router-dom";
-import { Search, Plus, Bell } from "lucide-react";
+import { Search, Plus, Bell, Sun, Moon } from "lucide-react";
 import { useAuth } from "../../features/auth/hooks/useAuth";
+import { useTheme } from "../../context/ThemeContext";
 import "./Topbar.css";
 
 const Topbar = ({ onSaveClick }) => {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -39,6 +41,14 @@ const Topbar = ({ onSaveClick }) => {
         >
           <Plus size={18} />
           <span>Save</span>
+        </button>
+
+        <button 
+          className="icon-btn theme-toggle" 
+          onClick={toggleTheme}
+          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        >
+          {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
         </button>
 
         <button className="icon-btn">

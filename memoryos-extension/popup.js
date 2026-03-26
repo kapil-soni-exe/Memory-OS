@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const summary = summaryInput.value;
 
     try {
-      const resp = await fetch("http://localhost:3000/api/items/save", {
+      const resp = await fetch(`${CONFIG.API_URL}/items/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

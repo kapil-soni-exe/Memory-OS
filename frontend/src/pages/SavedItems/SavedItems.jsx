@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Search } from 'lucide-react';
-import Sidebar from '../../components/Sidebar/Sidebar';
-import Topbar from '../../components/Topbar/Topbar';
-import SavedItemCard from '../../components/SavedItemCard/SavedItemCard';
-import ItemDetailPanel from '../../components/ItemDetailPanel/ItemDetailPanel';
-import SaveModal from '../../components/SaveModal/SaveModal';
-import useItems from '../../hooks/useItems';
+import Sidebar from '../../layouts/Sidebar/Sidebar';
+import Topbar from '../../layouts/Topbar/Topbar';
+import SavedItemCard from '../../features/items/components/SavedItemCard/SavedItemCard';
+import ItemDetailPanel from '../../features/items/components/ItemDetailPanel/ItemDetailPanel';
+import SaveModal from '../../features/items/components/SaveModal/SaveModal';
+import useItems from '../../features/items/hooks/useItems';
+import MobileNav from '../../layouts/MobileNav/MobileNav';
 import './SavedItems.css';
 
 const SavedItems = () => {
@@ -14,9 +15,20 @@ const SavedItems = () => {
   const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
-  
   const { items, loading, error, addItem, removeItem } = useItems();
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Sync deletion with search results
+  const handleRemoveItem = async (id) => {
+    try {
+      await removeItem(id);
+      if (searchResults) {
+        setSearchResults(prev => prev ? prev.filter(item => item._id !== id) : null);
+      }
+    } catch (err) {
+      console.error("Failed to remove item:", err);
+    }
+  };
 
   // Debounced Search Logic
   React.useEffect(() => {
@@ -24,7 +36,7 @@ const SavedItems = () => {
       const delayDebounceFn = setTimeout(async () => {
         setIsSearching(true);
         try {
-          const { searchItems } = await import('../../services/search.api');
+          const { searchItems } = await import('../../features/items/services/search.api');
           const results = await searchItems(searchQuery);
           setSearchResults(results.results);
         } catch (err) {
@@ -44,10 +56,21 @@ const SavedItems = () => {
   const filters = ['All', ...types.map(t => t.charAt(0).toUpperCase() + t.slice(1))];
 
   // Combine Search and Filter
-  const baseItems = searchResults || items;
+  const baseItems = searchResults || items || [];
   const filteredItems = activeFilter === 'All' 
     ? baseItems 
     : baseItems.filter(item => item.type?.toLowerCase() === activeFilter.toLowerCase());
+
+  // Determine which empty state to show
+  const getEmptyMessage = () => {
+    if (searchQuery.trim().length > 0) {
+      return `No results found for "${searchQuery}"`;
+    }
+    if (activeFilter !== 'All') {
+      return `No ${activeFilter.toLowerCase()} items found.`;
+    }
+    return "No memories saved yet. Click the + button to add one!";
+  };
 
   return (
     <div className="saved-items-layout">
@@ -88,13 +111,21 @@ const SavedItems = () => {
 
           <div className="saved-items-grid">
             {loading ? (
-              <p>Loading items...</p>
+              <div className="status-message">
+                <p>Loading your memory library...</p>
+              </div>
+            ) : isSearching ? (
+              <div className="status-message">
+                <p>Searching through your memories...</p>
+              </div>
             ) : filteredItems.length === 0 ? (
-              <p>No items found.</p>
+              <div className="status-message">
+                <p>{getEmptyMessage()}</p>
+              </div>
             ) : (
               filteredItems.map((item) => (
                 <div key={item._id} onClick={() => setSelectedItem(item)} className="card-clickable-wrapper">
-                  <SavedItemCard item={item} onDelete={removeItem} />
+                  <SavedItemCard item={item} onDelete={handleRemoveItem} />
                 </div>
               ))
             )}
@@ -106,7 +137,7 @@ const SavedItems = () => {
         item={selectedItem} 
         isOpen={!!selectedItem} 
         onClose={() => setSelectedItem(null)} 
-        onDelete={removeItem}
+        onDelete={handleRemoveItem}
       />
 
       <SaveModal 

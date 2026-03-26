@@ -20,30 +20,65 @@
   position: relative;
 }
 
-.immersive-graph-container {
-  flex: 1;
-  width: 100%;
-  height: 100%;
+.graph-page-fullscreen {
+  width: 100vw;
+  height: 100vh;
   position: relative;
   overflow: hidden;
   background: var(--color-bg);
 }
 
-.graph-overlay-header {
+.graph-back-btn {
   position: absolute;
   top: var(--sp-8);
   left: var(--sp-8);
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  color: var(--color-text-primary);
+  transition: all var(--ease-base);
+}
+
+.graph-back-btn:hover {
+  transform: translateX(-4px);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.graph-theme-toggle-wrapper {
+  position: absolute;
+  top: var(--sp-8);
   right: var(--sp-8);
+  z-index: 100;
+}
+
+.immersive-graph-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.graph-overlay-header {
+  position: absolute;
+  top: var(--sp-8);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: var(--sp-4) var(--sp-8);
+  text-align: center;
+  padding: var(--sp-4) var(--sp-12);
   border-radius: var(--radius-2xl);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(var(--color-bg-rgb), 0.6);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px);
-  pointer-events: none; /* Let clicks pass through to graph */
+  pointer-events: none;
+  /* Let clicks pass through to graph */
 }
 
 /* Re-enable pointer events for inner elements if needed, 
@@ -90,9 +125,20 @@
   border-radius: 50%;
 }
 
-.dot.topic { background: #7F5AF0; box-shadow: 0 0 10px rgba(127, 90, 240, 0.5); }
-.dot.item { background: #007AFF; box-shadow: 0 0 10px rgba(0, 122, 255, 0.5); }
-.dot.tag { background: #2CB67D; box-shadow: 0 0 10px rgba(44, 182, 125, 0.5); }
+.dot.topic {
+  background: #7F5AF0;
+  box-shadow: 0 0 10px rgba(127, 90, 240, 0.5);
+}
+
+.dot.item {
+  background: #007AFF;
+  box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
+}
+
+.dot.tag {
+  background: #2CB67D;
+  box-shadow: 0 0 10px rgba(44, 182, 125, 0.5);
+}
 
 .graph-loading-overlay {
   position: absolute;
@@ -116,7 +162,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .graph-loading-overlay span {
@@ -139,7 +187,8 @@
 
 @media (max-width: 768px) {
   .graph-page-content {
-    margin-bottom: 80px; /* Mobile tab bar height */
+    margin-bottom: 80px;
+    /* Mobile tab bar height */
   }
 
   .graph-overlay-header {

@@ -58,13 +58,17 @@ function AppRouter() {
   );
 }
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
-    <AuthProvider>
-      <ItemsProvider>
-        <AppRouter />
-      </ItemsProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ItemsProvider>
+          <AppRouter />
+        </ItemsProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
