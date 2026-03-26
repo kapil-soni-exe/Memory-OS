@@ -7,8 +7,10 @@ import searchRoutes from "./routes/search.routes.js"
 import topicRoutes from "./routes/topic.routes.js"
 import resurfaceRoutes from "./routes/resurface.routes.js"
 import nexusRoutes from "./routes/nexus.routes.js"
+import nuggetRoutes from "./routes/nugget.routes.js"
 import helmet from "helmet"
 import morgan from "morgan"
+import compression from "compression"
 import { authRateLimiter, globalRateLimiter } from "./middleware/rateLimit.middleware.js"
 import path from "path"
 import { fileURLToPath } from "url"
@@ -21,6 +23,7 @@ const app = express()
 
 // Security Headers
 app.use(helmet())
+app.use(compression())
 
 // Professional Request Logging
 // Professional Request Logging (Only in dev)
@@ -43,12 +46,19 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // Specific Rate Limiting for Auth
 // app.use("/api/auth", authRateLimiter)
-app.use("/api/auth", authRoutes)
-app.use("/api/items", itemRoutes)
+app.use("/api/auth", authRoutes);
+
+// Render Heartbeat & Liveness Probe
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "alive", timestamp: new Date().toISOString() });
+});
+
+app.use("/api/items", itemRoutes);
 app.use("/api/search", searchRoutes)
 app.use("/api/topics", topicRoutes)
 app.use("/api/resurface", resurfaceRoutes)
 app.use("/api/nexus", nexusRoutes)
+app.use("/api/nuggets", nuggetRoutes)
 
 // Error Handling Middleware (MUST be last)
 app.use(errorMiddleware)

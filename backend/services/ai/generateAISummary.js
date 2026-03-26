@@ -9,26 +9,26 @@ export const generateAISummary = async (title, content) => {
   try {
 
     const prompt = `
-You are an expert article summarizer.
+You are an expert knowledge architect.
 
-Summarize the following article in exactly 2 concise sentences.
+Generate a meaningful, high-density executive summary of the following content. 
+Focus on the core 'Why' and 'How' rather than just a shallow recap. 
 
 Title:
 ${title}
 
 Content:
-${content.slice(0,1500)}
+${content.slice(0, 10000)}
 
 Rules:
-- return only the summary
-- exactly 2 sentences
-- simple language
-- no bullet points
-- no explanations
+- return only the summary text
+- length: 3 to 6 sentences
+- professional but readable tone
+- no fluff or meta-talk
 `;
 
     const response = await client.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+      model: "llama-3.3-70b-versatile",
       messages: [
         { role: "user", content: prompt }
       ],

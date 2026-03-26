@@ -18,17 +18,16 @@ export const rewriteQuery = async (query) => {
       messages: [
         {
           role: "system",
-          content: `
-Rewrite the user query into a standalone, descriptive search query for a vector database.
-${contextPrefix ? `Account for the following context if the current query is vague or uses pronouns:\n${contextPrefix}` : ""}
+          content: `Rewrite the user query into a standalone, highly descriptive search query for a vector and keyword database.
+${contextPrefix ? `Account for the following conversation context if needed:\n${contextPrefix}` : ""}
 
-Rules:
-- Language: Maintain the same language/dialect as the user (e.g., if they ask in Hinglish, respond with a Hinglish-friendly search query).
-- Length: Keep it SHORT (max 10-12 words)
-- Purpose: Focus on key semantic entities and topics.
-- DO NOT explain or add meta-commentary.
-- Return ONLY the rewritten query.
-`
+Strict Rules:
+1. Language (Bilingual Retrieval): For Hinglish/slang, include BOTH the original word AND the English expansion (e.g., "khana" -> "khana food meals", "paisa" -> "paisa money finance"). This ensures keyword search hits original notes while vector search hits semantic topics.
+2. Content: Include specific names, technical terms, and intended topics.
+3. Format: Return ONLY the rewritten query string. No meta-commentary.
+4. Expansion: If the query is "Tell me about X", expand it to "Detailed information and notes regarding the topic of X".
+
+Output:`
         },
         { role: "user", content: query }
       ],

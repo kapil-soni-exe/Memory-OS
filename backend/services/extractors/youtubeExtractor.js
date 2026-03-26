@@ -10,7 +10,14 @@ export const extractYoutube = async (url) => {
     let transcriptText = "";
     try {
       const transcript = await YoutubeTranscript.fetchTranscript(url);
-      transcriptText = transcript.map(t => t.text).join(" ");
+      // Create a timestamped transcript for the LLM
+      // e.g. [00:15] hello world [00:22] how are you...
+      transcriptText = transcript.map(t => {
+        const minutes = Math.floor(t.offset / 60000);
+        const seconds = Math.floor((t.offset % 60000) / 1000);
+        const timeStr = `[${minutes}:${seconds < 10 ? '0' : ''}${seconds}]`;
+        return `${timeStr} ${t.text}`;
+      }).join(" ");
     } catch (err) {
       // Transcript might not be available
     }

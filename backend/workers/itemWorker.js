@@ -22,21 +22,27 @@ import { extractKnowledge } from "../services/ai/nexus/knowledgeExtractor.js";
  */
 const itemWorker = new Worker('item-processing', async (job) => {
   const { itemId, userId } = job.data;
+  console.log(`[Worker] Picking up job ${job.id} for item ${itemId}...`);
 
   try {
     const item = await Item.findById(itemId);
     if (!item) throw new Error("Item not found");
 
     // --- PHASE 1: Structured Knowledge Extraction (with Fallback) ---
-    const aiContent = item.content.slice(0, 2000);
-    let summary, tags, entities, relationships;
+    const aiContent = item.content.slice(0, 10000); // Increased to 10k as per last agreement
+    let summary, tags, entities, relationships, nuggets;
 
     try {
-      const knowledge = await extractKnowledge(item.title, aiContent);
+      const knowledge = await extractKnowledge(item.title, aiContent, {
+        type: item.type,
+        author: item.author,
+        metadata: item.metadata
+      });
       summary = knowledge.summary;
       tags = knowledge.tags;
       entities = knowledge.entities;
       relationships = knowledge.relationships;
+      nuggets = knowledge.nuggets;
     } catch (err) {
       console.error(`[Worker] Knowledge extraction failed, using fallback: ${err.message}`);
       [tags, summary] = await Promise.all([
@@ -45,6 +51,7 @@ const itemWorker = new Worker('item-processing', async (job) => {
       ]);
       entities = [];
       relationships = [];
+      nuggets = [];
     }
 
     // --- PHASE 2: Knowledge-Centric Embedding ---
@@ -63,23 +70,23 @@ ${(entities || []).join(", ")}
 
 Relationships:
 ${(relationships || [])
-  .map(r => `${r.source} ${r.relation} ${r.target}`)
-  .join(". ")
-}
+        .map(r => `${r.source} ${r.relation} ${r.target}`)
+        .join(". ")
+      }
 `.trim();
 
     const embedding = await generateEmbedding(embeddingText);
-    
+
     let vectorId = null;
     let clusterId = null;
     let relatedIds = [];
 
     if (embedding) {
       vectorId = uuidv4();
-      
+
       // Smart Clustering: Groups similar memories based on spatial distance
       clusterId = await detectClusterByEmbedding(embedding, userId);
-      
+
       // Indexing in Qdrant for fast semantic retrieval
       await qdrant.upsert("items_vectors", {
         points: [{
@@ -114,6 +121,7 @@ ${(relationships || [])
       summary: summary || "",
       entities: entities || [],
       relationships: relationships || [],
+      nuggets: nuggets || [],
       vectorId,
       clusterId,
       relatedItems: relatedIds,
@@ -128,7 +136,7 @@ ${(relationships || [])
   }
 }, {
   connection: redisConnection,
-  concurrency: 3
+  concurrency: 5
 });
 
 export default itemWorker;

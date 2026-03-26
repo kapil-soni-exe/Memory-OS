@@ -16,11 +16,12 @@ export const searchItems = async (req, res) => {
     const query = q.trim();
 
     // Perform hybrid search
-    const results = await hybridSearch(query, req.user);
+    const { results, isFallback } = await hybridSearch(query, req.user);
 
     res.json({
       query,
-      results
+      results,
+      isFallback: isFallback || false
     });
 
   } catch (error) {

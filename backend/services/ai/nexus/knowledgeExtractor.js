@@ -17,44 +17,63 @@ const client = new OpenAI({
 /**
  * Extracts structured knowledge from raw content using LLM.
  * @param {string} title - The title of the content.
- * @param {string} content - The raw text content (first 2000 chars).
+ * @param {string} content - The raw text content.
+ * @param {Object} context - Optional context like type, metadata, author.
  * @returns {Promise<Object>} - { summary, tags, entities, relationships }
  */
-export const extractKnowledge = async (title, content) => {
+export const extractKnowledge = async (title, content, context = {}) => {
   try {
     const contentLength = content?.length || 0;
+    const { type, author, metadata } = context;
     
     // 1. Content Throttling: Skip API for tiny notes
-    if (contentLength < 50) {
+    if (contentLength < 50 && type !== 'image') {
       return {
         summary: `A short note about ${title || 'this topic'}.`,
         tags: ["quick-note"],
         entities: [],
-        relationships: []
+        relationships: [],
+        nuggets: [{ text: `Saved a quick note: ${title || 'Empty'}`, category: "Quick Note" }]
       };
     }
 
     // 2. Conditional Extraction: Only extract complex data for longer content
     const isDetailed = contentLength > 500;
-    const model = isDetailed ? "llama-3.1-8b-instant" : "llama-3.1-8b-instant"; // Using 8B for both for now to save costs, can switch to 70B for detailed if desired.
+    const model = "llama-3.3-70b-versatile";
+
+    const contextStr = `
+TYPE: ${type || 'unknown'}
+AUTHOR: ${author || 'unknown'}
+METADATA: ${metadata ? JSON.stringify(metadata) : 'none'}
+`.trim();
 
     const prompt = `
-You are an expert knowledge extraction system.
+You are an expert knowledge architect and information synthesizer.
 
+${contextStr}
 TITLE: ${title}
 CONTENT: ${content}
 
-Extract and return ONLY valid JSON:
+GOAL: Extract a high-value, meaningful "Executive Summary" and structured insights from this content.
+
+RULES:
+1. SUMMARY: Write a sophisticated 3-6 sentence executive summary. Do not just recap; highlight the core argument, the most unique insight, and why this is valuable.
+2. NUGGETS: Extract 3-7 "Knowledge Nuggets". Each nugget must be a punchy, stand-alone insight (max 180 chars).
+3. If the CONTENT contains timestamps like [m:ss], use them to determine the "startTime" (in total seconds) for each nugget.
+4. Extract and return ONLY valid JSON:
 {
-  "summary": "A concise 3-4 sentence summary of the core idea",
-  "tags": ["3-5 high-level topics"]${isDetailed ? `,
+  "summary": "The structured executive summary text",
+  "tags": ["3-5 precise, hierarchical tags"],
+  "nuggets": [
+    { 
+      "text": "The insight text...", 
+      "category": "Insight|Action|Fact",
+      "startTime": 45 
+    }
+  ]${isDetailed ? `,
   "entities": ["key names, organizations, concepts"],
   "relationships": [{ "source": "A", "relation": "connection", "target": "B" }]` : ""}
 }
-
-RULES:
-- Do not add extra text
-- Output ONLY valid JSON
 `.trim();
 
     const response = await client.chat.completions.create({
@@ -73,7 +92,8 @@ RULES:
       summary: "",
       tags: [],
       entities: [],
-      relationships: []
+      relationships: [],
+      nuggets: []
     };
   }
 };

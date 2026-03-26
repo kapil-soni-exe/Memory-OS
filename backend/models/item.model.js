@@ -46,6 +46,14 @@ const itemSchema = new mongoose.Schema(
         relation: String,
       },
     ],
+    nuggets: [
+      {
+        text: String,
+        category: String,
+        importance: { type: Number, default: 1 },
+        startTime: { type: Number, default: null }, // Start time in seconds for video segments
+      },
+    ],
 
     // Flexible metadata for different platforms
     metadata: {

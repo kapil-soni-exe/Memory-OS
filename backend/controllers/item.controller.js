@@ -52,6 +52,8 @@ export const saveItem = async (req, res) => {
           content: extractedData.content,
           type: "pdf",
           url: fileUrl,
+          author: extractedData.metadata?.author,
+          metadata: extractedData.metadata,
           source: "manual"
         };
       }
@@ -182,7 +184,7 @@ export const deleteItem = async (req, res) => {
           points: [item.vectorId],
         });
       }
-      
+
       // Secondary safety check: delete by itemId payload to ensure no orphans
       await qdrant.delete("items_vectors", {
         filter: {

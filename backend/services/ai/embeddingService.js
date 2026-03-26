@@ -1,33 +1,70 @@
-import { CohereClient } from "cohere-ai";
 import dotenv from "dotenv";
 dotenv.config();
 
-const cohere = new CohereClient({
-  token: process.env.COHERE_API_KEY
-});
+import redisConnection from "../../config/redis.js";
+import crypto from 'crypto';
 
-// Generate embedding vector for semantic search
-export const generateEmbedding = async (text, inputType = "search_document") => {
+// Voyage AI is our Single Stable Primary Engine (1024 Dims)
+const VOYAGE_KEY = process.env.VOYAGE_API_KEY;
+
+// Cache TTL: 7 Days
+const CACHE_TTL = 604800;
+
+/**
+ * Generate embedding vector using Voyage AI (Production Stability)
+ * @param {string} text - Input text
+ * @param {string} inputType - "query" or "document" (Voyage style)
+ * @returns {Promise<Array|null>} - 1024-dimension vector
+ */
+export const generateEmbedding = async (text, inputType = "document") => {
   try {
+    if (!text || text.trim().length === 0) return null;
 
-    // Guard: prevent empty embedding requests
-    if (!text || text.trim().length === 0) {
-      return null;
-    }
+    const inputText = text.trim().slice(0, 4000); // Voyage supports larger context
 
-    // Limit text size for embedding models
-    const inputText = text.trim().slice(0, 2000);
+    // 1. Check Cache
+    const hash = crypto.createHash('md5').update(`${inputText}:${inputType}`).digest('hex');
+    const cacheKey = `embedding:cache:${hash}`;
+    const cached = await redisConnection.get(cacheKey);
+    if (cached) return JSON.parse(cached);
 
-    const response = await cohere.embed({
-      model: "embed-english-v3.0",
-      texts: [inputText],
-      inputType: inputType
+    // 2. Direct Voyage AI Call
+    console.log(`[Voyage AI] Generating embedding for: "${inputText.slice(0, 30)}..."`);
+    
+    const response = await fetch("https://api.voyageai.com/v1/embeddings", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${VOYAGE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        input: [inputText],
+        model: "voyage-3",
+        input_type: inputType === "search_query" ? "query" : "document"
+      })
     });
 
-    return response.embeddings?.[0] || null;
+    if (response.ok) {
+      const data = await response.json();
+      const embedding = data.data?.[0]?.embedding || null;
+      
+      if (embedding && embedding.length === 1024) {
+        // Save to Cache
+        await redisConnection.set(cacheKey, JSON.stringify(embedding), 'EX', CACHE_TTL);
+        console.log("[Voyage AI] SUCCESS: 1024-Dim Vector generated.");
+        return embedding;
+      } else {
+        console.error("[Voyage AI] Dimension Mismatch or Empty Result");
+      }
+    } else {
+      const err = await response.text();
+      console.error(`[Voyage AI] API Error (${response.status}):`, err);
+    }
+
+    return null; // Triggers Resilience 2.0 (Keywords)
 
   } catch (error) {
-    console.error("Embedding generation failed:", error.message);
+    console.error("[Voyage AI] Critical Failure:", error.message);
     return null;
   }
 };
