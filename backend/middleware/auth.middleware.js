@@ -3,6 +3,10 @@ import jwt from "jsonwebtoken";
 const protect = (req, res, next) => {
 
   const token = req.cookies.token;
+  
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[Auth] Path: ${req.path}, Token present: ${!!token}`);
+  }
 
   if (!token) {
     return res.status(401).json({

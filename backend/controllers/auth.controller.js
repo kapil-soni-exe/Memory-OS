@@ -37,13 +37,13 @@ import User from "../models/user.model.js"
       { expiresIn: "7d" }
     );
 
-    const isProduction = process.env.NODE_ENV === "production";
+    const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
     const cookieOptions = {
       httpOnly: true,
-      secure: isProduction, // Secure only in production (HTTPS)
-      sameSite: isProduction ? "none" : "lax", // Lax for local, None for cross-site prod
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-      partitioned: isProduction // Add partitioning for modern Chrome support
+      partitioned: isProduction
     };
 
     res.cookie("token", token, cookieOptions);
@@ -86,7 +86,7 @@ export const loginUser = async (req, res) => {
             { expiresIn: "7d" }
         );
 
-        const isProduction = process.env.NODE_ENV === "production";
+        const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
         const cookieOptions = {
             httpOnly: true,
             secure: isProduction,
@@ -117,7 +117,7 @@ export const loginUser = async (req, res) => {
  */
 export const logoutUser = async (req, res) => {
     try {
-        const isProduction = process.env.NODE_ENV === "production";
+        const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
         res.clearCookie("token", {
             httpOnly: true,
             secure: isProduction,
