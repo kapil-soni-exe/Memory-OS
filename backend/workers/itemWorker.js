@@ -26,9 +26,15 @@ const itemWorker = new Worker('item-processing', async (job) => {
 
   try {
     const item = await Item.findById(itemId);
-    if (!item) throw new Error("Item not found");
+    if (!item) {
+      console.warn(`[Worker] Job ${job.id} skipped: Item ${itemId} not found`);
+      return;
+    }
+
+    console.log(`[Worker] 🧠 Processing: "${item.title}" (${item.type}) for user ${userId}`);
 
     // --- PHASE 1: Structured Knowledge Extraction (with Fallback) ---
+    console.log(`[Worker] ✨ Extracting AI Knowledge for item ${itemId}...`);
     const aiContent = item.content.slice(0, 10000); // Increased to 10k as per last agreement
     let summary, tags, entities, relationships, nuggets;
 
@@ -127,6 +133,8 @@ ${(relationships || [])
       relatedItems: relatedIds,
       processingStatus: "completed"
     });
+
+    console.log(`[Worker] ✅ Success: "${item.title}" processing complete.`);
 
     // (Log removed for production)
   } catch (error) {

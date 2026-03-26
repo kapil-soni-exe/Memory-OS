@@ -107,6 +107,8 @@ export const saveItem = async (req, res) => {
       userId: req.user.toString()
     });
 
+    console.log(`[API] ➕ Added to processing queue: "${item.title}" (ID: ${item._id})`);
+
     res.status(201).json({
       message: "Memory saved! Processing in background...",
       item
