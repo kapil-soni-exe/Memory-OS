@@ -118,6 +118,11 @@ const SavedItems = () => {
               <div className="status-message">
                 <p>Searching through your memories...</p>
               </div>
+            ) : error ? (
+              <div className="status-message error">
+                <p>⚠️ Failed to load memories: {error.message || "Unauthorized"}</p>
+                <button onClick={() => window.location.reload()} className="retry-btn">Retry</button>
+              </div>
             ) : filteredItems.length === 0 ? (
               <div className="status-message">
                 <p>{getEmptyMessage()}</p>
