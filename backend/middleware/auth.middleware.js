@@ -1,11 +1,15 @@
 import jwt from "jsonwebtoken";
 
 const protect = (req, res, next) => {
+  let token = req.cookies.token;
 
-  const token = req.cookies.token;
-  
+  // Fallback to Authorization Header (Bearer token) for Extension requests
+  if (!token && req.headers.authorization?.startsWith("Bearer")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
   if (process.env.NODE_ENV !== "production") {
-    console.log(`[Auth] Path: ${req.path}, Token present: ${!!token}`);
+    console.log(`[Auth] Path: ${req.path}, Token present: ${!!token}, Method: ${req.headers.authorization ? "Header" : "Cookie"}`);
   }
 
   if (!token) {

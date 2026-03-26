@@ -15,13 +15,22 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     const url = tab.url;
     const title = tab.title;
 
+    // Get token manually for auth stability
+    const cookie = await chrome.cookies.get({
+      url: "https://memory-os.onrender.com",
+      name: "token"
+    });
+    const authHeader = cookie ? { "Authorization": `Bearer ${cookie.value}` } : {};
+
     // Send to background for processing
     try {
       const response = await fetch(`${CONFIG.API_URL}/items/save`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          ...authHeader
         },
+        credentials: "include",
         body: JSON.stringify({
           url,
           title,

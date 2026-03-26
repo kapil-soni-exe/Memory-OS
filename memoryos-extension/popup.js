@@ -15,11 +15,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   urlPreview.textContent = new URL(tab.url).hostname;
   saveBtn.disabled = true;
 
+  // Helper to get auth header from cookies
+  const getAuthHeader = async () => {
+    try {
+      // Get the token cookie for the render domain
+      const cookie = await chrome.cookies.get({
+        url: "https://memory-os.onrender.com",
+        name: "token"
+      });
+      return cookie ? { "Authorization": `Bearer ${cookie.value}` } : {};
+    } catch (e) {
+      console.warn("Failed to read cookies:", e);
+      return {};
+    }
+  };
+
   // 1. PHASE 1: Extraction (Server-side for high fidelity)
   try {
+    const authHeader = await getAuthHeader();
     const response = await fetch(`${CONFIG.API_URL}/items/extract`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...authHeader
+      },
       credentials: "include",
       body: JSON.stringify({ url: tab.url })
     });
@@ -33,7 +52,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveBtn.disabled = false;
   } catch (err) {
     console.warn("Server extraction failed, falling back to local metadata.");
-    // Fallback constant title
     titlePreview.textContent = tab.title;
     saveBtn.disabled = false;
   }
@@ -52,14 +70,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     const summary = summaryInput.value;
 
     try {
+      const authHeader = await getAuthHeader();
       const resp = await fetch(`${CONFIG.API_URL}/items/save`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...authHeader
+        },
         credentials: "include",
         body: JSON.stringify({
           url: tab.url,
           title: titlePreview.textContent,
-          content: extractedData?.content || "", // Send the full content we extracted
+          content: extractedData?.content || "", 
           summary: summary || "Captured via MemoryOS Extension",
           tags: tags.length > 0 ? tags : ["extension-save"],
           image: extractedData?.image,
