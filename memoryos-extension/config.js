@@ -1,5 +1,6 @@
 const CONFIG = {
-  API_URL: "https://memory-os.onrender.com/api"
+  API_URL: "https://memory-os.onrender.com/api",
+  DASHBOARD_URL: "https://memory-os-nine.vercel.app"
 };
 
 // Use this for local dev:
