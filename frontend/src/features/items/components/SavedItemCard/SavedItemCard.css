@@ -167,7 +167,7 @@
 .item-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sp-1.5);
+  gap: var(--sp-1-5);
   padding: 0 var(--sp-4) var(--sp-4);
 }
 
