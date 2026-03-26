@@ -53,7 +53,7 @@ const BrowserExtension = () => (
           <a
             href="/extension.zip"
             download="extension.zip"
-            className="download-btn-primary"
+            className="ext__cta"
           >
             <MousePointerClick size={16} strokeWidth={2} />
             Download Extension — free

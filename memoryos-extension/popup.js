@@ -69,6 +69,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         })
       });
 
+      if (resp.status === 401) {
+        throw new Error("UNAUTHORIZED");
+      }
+
       if (resp.ok) {
         statusEl.textContent = "Memory Added Successfully! ✨";
         statusEl.style.color = "#2cb67d";
@@ -78,7 +82,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         throw new Error("Server rejected save");
       }
     } catch (error) {
-      statusEl.textContent = "Error: Galaxy connection failed.";
+      if (error.message === "UNAUTHORIZED") {
+        statusEl.textContent = "Error: Please login to Dashboard first.";
+      } else {
+        statusEl.textContent = "Error: Galaxy connection failed.";
+      }
       statusEl.style.color = "#ef4565";
       saveBtn.disabled = false;
       saveBtn.querySelector(".btn-text").textContent = "Try Again";
