@@ -1,10 +1,10 @@
 .topbar {
   height: var(--nav-height);
   padding: 0 var(--sp-8);
-  background: var(--color-surface);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(to bottom, rgba(16, 16, 16, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
   justify-content: space-between;
