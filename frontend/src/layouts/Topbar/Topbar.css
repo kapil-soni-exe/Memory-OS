@@ -86,8 +86,11 @@
 
 @media (max-width: 768px) {
   .topbar {
-    height: 60px;
-    padding: 0 var(--sp-4);
+    height: auto;
+    min-height: 60px;
+    padding-top: env(safe-area-inset-top, 20px);
+    padding-bottom: var(--sp-2);
+    padding-inline: var(--sp-4);
     justify-content: space-between;
   }
 
