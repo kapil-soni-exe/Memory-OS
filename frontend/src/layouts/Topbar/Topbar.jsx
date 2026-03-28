@@ -1,6 +1,6 @@
 import { useNavigate, Link } from "react-router-dom";
 import { Plus, Bell, Sun, Moon } from "lucide-react";
-import { useAuth } from "../../features/auth/hooks/useAuth";
+import { useAuth } from "../../modules/auth/hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import "./Topbar.css";
 

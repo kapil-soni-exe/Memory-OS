@@ -7,9 +7,10 @@ import {
   Share2,
   Settings,
   LogOut,
-  Plus
+  Plus,
+  Sparkles
 } from 'lucide-react';
-import { useAuth } from '../../features/auth/hooks/useAuth';
+import { useAuth } from '../../modules/auth/hooks/useAuth';
 import './Sidebar.css';
 
 const Sidebar = () => {
@@ -21,6 +22,7 @@ const Sidebar = () => {
     { icon: Bookmark, label: 'Saved Items', path: '/saved' },
     { icon: Hash, label: 'Topics', path: '/topics' },
     { icon: Share2, label: 'Knowledge Graph', path: '/graph' },
+    { icon: Sparkles, label: 'Second Draft', path: '/composer' },
   ];
 
   return (
