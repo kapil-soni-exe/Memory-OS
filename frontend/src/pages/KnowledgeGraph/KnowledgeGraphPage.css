@@ -64,80 +64,134 @@
 
 .graph-overlay-header {
   position: absolute;
-  top: var(--sp-8);
+  top: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  text-align: center;
-  padding: var(--sp-4) var(--sp-12);
-  border-radius: var(--radius-2xl);
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  pointer-events: none;
-  /* Let clicks pass through to graph */
+  gap: var(--sp-8);
+  padding: 6px 24px;
+  max-width: 640px;
+  width: fit-content;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  backdrop-filter: blur(20px) saturate(180%);
+  pointer-events: auto;
+  box-shadow: var(--shadow-md);
 }
 
 /* Re-enable pointer events for inner elements if needed, 
    but for now header text and legend don't need clicks */
 
 .page-title {
-  font-size: var(--text-2xl);
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--color-text-primary);
-  letter-spacing: -0.04em;
-  margin-bottom: 2px;
+  letter-spacing: -0.02em;
+  margin-bottom: 0;
 }
 
 .page-subtitle {
-  color: var(--color-text-tertiary);
-  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-size: 9px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0.5;
+}
+
+.graph-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
   letter-spacing: 0.05em;
+  color: var(--color-text-tertiary);
+  pointer-events: auto;
+}
+
+.graph-breadcrumbs span {
+  cursor: pointer;
+  opacity: 0.4;
+  transition: all var(--ease-base);
+}
+
+.graph-breadcrumbs span:hover {
+  opacity: 0.8;
+  color: var(--feature-purple);
+}
+
+.graph-breadcrumbs span.active {
+  opacity: 1;
+  color: var(--color-text-primary);
+}
+
+.graph-breadcrumbs .separator {
+  opacity: 0.2;
+  cursor: default;
+  margin: 0 2px;
 }
 
 .graph-legend {
   display: flex;
-  gap: var(--sp-6);
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-full);
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 12px;
+  background: transparent;
+  backdrop-filter: none;
+  border-left: 1px solid var(--color-border);
+  border-radius: 0;
+}
+
+.legend-items {
+  display: flex;
+  gap: 20px;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 500;
   color: var(--color-text-secondary);
-  letter-spacing: 0.05em;
+}
+
+.legend-hint {
+  display: none; /* Hide hint in compact view */
+}
+
+.hint-icon {
+  color: #7F5AF0;
+  opacity: 0.8;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
 }
 
 .dot.topic {
-  background: #7F5AF0;
-  box-shadow: 0 0 10px rgba(127, 90, 240, 0.5);
+  background: var(--feature-purple);
+  box-shadow: 0 0 8px var(--feature-purple-bg);
 }
 
 .dot.item {
-  background: #007AFF;
-  box-shadow: 0 0 10px rgba(0, 122, 255, 0.5);
+  background: var(--feature-blue);
+  box-shadow: 0 0 8px var(--feature-blue-bg);
 }
 
-.dot.tag {
-  background: #2CB67D;
-  box-shadow: 0 0 10px rgba(44, 182, 125, 0.5);
+.dot.entity {
+  background: var(--feature-pink);
+  box-shadow: 0 0 8px var(--feature-pink-bg);
 }
 
 .graph-loading-overlay {

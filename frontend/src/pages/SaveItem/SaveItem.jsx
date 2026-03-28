@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, ArrowLeft } from 'lucide-react';
 import Sidebar from '../../layouts/Sidebar/Sidebar';
-import SaveForm from '../../features/items/components/SaveForm/SaveForm';
-import { saveItem } from '../../features/items/services/item.api';
+import SaveForm from '../../modules/items/components/SaveForm/SaveForm';
+import { saveItem } from '../../modules/items/services/item.api';
 import './SaveItem.css';
 
 const SaveItem = () => {

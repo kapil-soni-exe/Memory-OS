@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { User, Mail, Lock, Loader2 } from 'lucide-react';
 import AuthLayout from '../../layouts/AuthLayout/AuthLayout';
-import { useAuth } from '../../features/auth/hooks/useAuth';
+import { useAuth } from '../../modules/auth/hooks/useAuth';
 import './Signup.css';
 
 const Signup = () => {
