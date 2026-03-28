@@ -1,22 +1,22 @@
 import React from 'react';
-import Navbar from '../../features/landing/components/Navbar/Navbar';
-import Hero from '../../features/landing/components/Hero/Hero';
-import HowItWorks from '../../features/landing/components/HowItWorks/HowItWorks';
-import Features from '../../features/landing/components/Features/Features';
-import BrowserExtension from '../../features/landing/components/BrowserExtension/BrowserExtension';
-import CTA from '../../features/landing/components/CTA/CTA';
+import NavbarSection from './sections/NavbarSection/NavbarSection';
+import HeroSection from './sections/HeroSection/HeroSection';
+import HowItWorksSection from './sections/HowItWorksSection/HowItWorksSection';
+import FeaturesSection from './sections/FeaturesSection/FeaturesSection';
+import BrowserExtensionSection from './sections/BrowserExtensionSection/BrowserExtensionSection';
+import CTASection from './sections/CTASection/CTASection';
 import './Landing.css';
 
 const Landing = () => (
   <>
-    <Navbar />
+    <NavbarSection />
 
     <main>
-      <Hero />
-      <HowItWorks />
-      <Features />
-      <BrowserExtension />
-      <CTA />
+      <HeroSection />
+      <HowItWorksSection />
+      <FeaturesSection />
+      <BrowserExtensionSection />
+      <CTASection />
     </main>
 
     <footer className="footer">
