@@ -1,65 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import Sidebar from '../../layouts/Sidebar/Sidebar';
 import Topbar from '../../layouts/Topbar/Topbar';
-import SavedItemCard from '../../features/items/components/SavedItemCard/SavedItemCard';
-import ItemDetailPanel from '../../features/items/components/ItemDetailPanel/ItemDetailPanel';
-import SaveModal from '../../features/items/components/SaveModal/SaveModal';
-import useItems from '../../features/items/hooks/useItems';
+import SavedItemCard from '../../modules/items/components/SavedItemCard/SavedItemCard';
+import ItemDetailPanel from '../../modules/items/components/ItemDetailPanel/ItemDetailPanel';
+import SaveModal from '../../modules/items/components/SaveModal/SaveModal';
+import { useItemsQuery } from '../../modules/items/hooks/useItemsQuery';
+import { useDeleteItem } from '../../modules/items/hooks/useItemMutation';
+import { useSearchQuery } from '../../modules/items/hooks/useSearchQuery';
 import MobileNav from '../../layouts/MobileNav/MobileNav';
+import useItemFilter from '../../modules/items/hooks/useItemFilter';
 import './SavedItems.css';
 
 const SavedItems = () => {
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState(null);
-  const { items, loading, error, addItem, removeItem } = useItems();
-  const [isSearching, setIsSearching] = useState(false);
+  
+  const { data: queryItems, isLoading: queryLoading, isError: queryError, error: qError } = useItemsQuery();
+  
+  const deleteMutation = useDeleteItem();
 
-  // Sync deletion with search results
-  const handleRemoveItem = async (id) => {
-    try {
-      await removeItem(id);
-      if (searchResults) {
-        setSearchResults(prev => prev ? prev.filter(item => item._id !== id) : null);
-      }
-    } catch (err) {
-      console.error("Failed to remove item:", err);
+  const { data: searchResults, isLoading: isSearching } = useSearchQuery(searchQuery);
+  
+  // Adapt data for consumption
+  const items = queryItems || [];
+  const loading = queryLoading;
+  const error = queryError ? qError : null;
+  
+  /**
+   * 🧩 Hybrid Architecture - Logic Layer: 
+   * Search results now come from TanStack Query (debounced & cached).
+   * Filtering logic handles the "which things to show" math.
+   */
+  const { activeFilter, setActiveFilter, filters, filteredItems } = useItemFilter(items, searchResults);
+  
+  const handleRemoveItem = (id) => {
+    if (window.confirm("Delete this memory forever?")) {
+      deleteMutation.mutate(id);
     }
   };
-
-  // Debounced Search Logic
-  React.useEffect(() => {
-    if (searchQuery.trim().length > 2) {
-      const delayDebounceFn = setTimeout(async () => {
-        setIsSearching(true);
-        try {
-          const { searchItems } = await import('../../features/items/services/search.api');
-          const results = await searchItems(searchQuery);
-          setSearchResults(results.results);
-        } catch (err) {
-          console.error("Search failed:", err);
-        } finally {
-          setIsSearching(false);
-        }
-      }, 300);
-      return () => clearTimeout(delayDebounceFn);
-    } else {
-      setSearchResults(null);
-    }
-  }, [searchQuery]);
-
-  // Dynamically derive filters from existing types
-  const types = items ? [...new Set(items.map(item => item.type).filter(Boolean))] : [];
-  const filters = ['All', ...types.map(t => t.charAt(0).toUpperCase() + t.slice(1))];
-
-  // Combine Search and Filter
-  const baseItems = searchResults || items || [];
-  const filteredItems = activeFilter === 'All' 
-    ? baseItems 
-    : baseItems.filter(item => item.type?.toLowerCase() === activeFilter.toLowerCase());
 
   // Determine which empty state to show
   const getEmptyMessage = () => {

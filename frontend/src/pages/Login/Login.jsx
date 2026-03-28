@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Loader2 } from 'lucide-react';
 import AuthLayout from '../../layouts/AuthLayout/AuthLayout';
-import { useAuth } from '../../features/auth/hooks/useAuth';
+import { useAuth } from '../../modules/auth/hooks/useAuth';
 import './Login.css';
 
 const Login = () => {
