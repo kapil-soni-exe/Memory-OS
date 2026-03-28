@@ -44,8 +44,7 @@
 }
 
 .nexus-trigger-btn.active {
-  background: var(--color-surface-raised);
-  color: var(--color-accent, var(--purple-primary));
+  background: var(--color-btn-dark-bg);
   transform: rotate(180deg) scale(0.9);
 }
 

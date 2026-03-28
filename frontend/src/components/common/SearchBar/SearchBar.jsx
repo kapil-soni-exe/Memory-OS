@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import { Search, Loader2 } from "lucide-react";
-import { searchItems } from "../../../features/items/services/search.api";
+import { searchItems } from "../../../modules/items/services/search.api";
 import "./SearchBar.css";
 
 const SearchBar = ({ onSearchResults, items = [] }) => {
