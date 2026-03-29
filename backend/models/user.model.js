@@ -17,6 +17,12 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     select: false
+  },
+
+  topicAffinity: {
+    type: Map,
+    of: Number,
+    default: {}
   }
 
 }, { timestamps: true })

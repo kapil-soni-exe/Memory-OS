@@ -8,6 +8,7 @@ import topicRoutes from "./routes/topic.routes.js"
 import resurfaceRoutes from "./routes/resurface.routes.js"
 import nexusRoutes from "./routes/nexus.routes.js"
 import nuggetRoutes from "./routes/nugget.routes.js"
+import composerRoutes from "./routes/composer.routes.js"
 import helmet from "helmet"
 import morgan from "morgan"
 import compression from "compression"
@@ -35,10 +36,12 @@ if (process.env.NODE_ENV !== "production") {
 // app.use(globalRateLimiter)
 
 app.use(express.json())
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 const allowedOrigins = [
-  "https://memory-os-nine.vercel.app",
-  "https://memory-os-nine.vercel.app/",
-  "http://localhost:5173"
+  FRONTEND_URL,
+  FRONTEND_URL.replace(/\/$/, ""),       // without trailing slash
+  FRONTEND_URL.replace(/\/$/, "") + "/", // with trailing slash
+  "http://localhost:5173",               // always allow local dev
 ];
 
 app.use(cors({
@@ -71,6 +74,7 @@ app.use("/api/topics", topicRoutes)
 app.use("/api/resurface", resurfaceRoutes)
 app.use("/api/nexus", nexusRoutes)
 app.use("/api/nuggets", nuggetRoutes)
+app.use("/api/composer", composerRoutes)
 
 // Error Handling Middleware (MUST be last)
 app.use(errorMiddleware)

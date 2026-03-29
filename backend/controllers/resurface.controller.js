@@ -6,9 +6,13 @@ import * as resurfaceService from "../services/resurface.service.js";
 export async function getResurfaceItems(req, res) {
   try {
     const userId = req.user;
-    
-    const items = await resurfaceService.getResurfaceItems(userId);
-    
+    const { contextTags } = req.query;
+
+    // Convert comma-separated string to array if exists
+    const tags = contextTags ? contextTags.split(',') : [];
+
+    const items = await resurfaceService.getResurfaceItems(userId, { contextTags: tags });
+
     return res.status(200).json({
       success: true,
       items
@@ -30,9 +34,9 @@ export async function interactItem(req, res) {
   try {
     const { itemId } = req.params;
     const { action } = req.body; // "view", "like", "skip"
-    
+
     await resurfaceService.logInteraction(itemId, action);
-    
+
     return res.status(200).json({ success: true });
   } catch (error) {
     console.error("Interact controller error:", error);

@@ -16,19 +16,29 @@ const client = new OpenAI({
  * @param {number} temperature - Generation temperature (default: 0.3)
  * @returns {Promise<string>}
  */
-export const generateAnswer = async (prompt, model = "llama-3.3-70b-versatile", temperature = 0.3) => {
+export const generateAnswer = async (promptOrMessages, model = "llama-3.3-70b-versatile", temperature = 0.3) => {
   try {
+    let messages = [];
+    
+    if (Array.isArray(promptOrMessages)) {
+      messages = promptOrMessages;
+    } else {
+      messages = [{ role: "user", content: promptOrMessages }];
+    }
+
     const response = await client.chat.completions.create({
       model: model,
-      messages: [{ role: "user", content: prompt }],
+      messages: messages,
       temperature: temperature
     });
 
     return response.choices?.[0]?.message?.content?.trim() || "The Nexus is silent. Please try again.";
   } catch (error) {
-    console.error("Groq API Error:", error.message);
+    if (error.status === 429) {
+      return "RATE_LIMIT_EXCEEDED: The Nexus is currently throttled (Free Tier). Please wait 10-15 seconds before your next request.";
+    }
     if (error.message.includes("ECONNRESET")) {
-      return "The connection to the Nexus was lost. Let me try once more...";
+      return "CONNECTION_LOST: The connection was interrupted. Let me try once more...";
     }
     throw error;
   }

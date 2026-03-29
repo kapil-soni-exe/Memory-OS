@@ -12,12 +12,15 @@ export const getNuggetFeed = async (req, res) => {
   try {
     const userId = req.user;
 
-    // Fetch items that have nuggets
+    // Fetch items that have nuggets OR are currently being processed
     const items = await Item.find({
       user: userId,
-      "nuggets.0": { $exists: true }
+      $or: [
+        { "nuggets.0": { $exists: true } },
+        { processingStatus: { $in: ['pending', 'processing'] } }
+      ]
     })
-    .select("title nuggets createdAt type image url")
+    .select("title nuggets createdAt type image url processingStatus")
     .sort({ updatedAt: -1 })
     .lean();
 
@@ -30,6 +33,7 @@ export const getNuggetFeed = async (req, res) => {
       image: item.image,
       url: item.url,
       nuggets: item.nuggets,
+      processingStatus: item.processingStatus,
       lastUpdated: item.updatedAt
     }));
 

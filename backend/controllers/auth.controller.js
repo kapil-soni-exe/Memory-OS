@@ -34,7 +34,7 @@ import User from "../models/user.model.js"
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "30d" }
     );
 
     const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
@@ -42,7 +42,7 @@ import User from "../models/user.model.js"
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "none" : "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000,
       partitioned: isProduction
     };
 
@@ -83,7 +83,7 @@ export const loginUser = async (req, res) => {
         const token = jwt.sign(
             { id: user._id },
             process.env.JWT_SECRET,
-            { expiresIn: "7d" }
+            { expiresIn: "30d" }
         );
 
         const isProduction = process.env.NODE_ENV === "production" || process.env.RENDER === "true";
@@ -91,7 +91,7 @@ export const loginUser = async (req, res) => {
             httpOnly: true,
             secure: isProduction,
             sameSite: isProduction ? "none" : "lax",
-            maxAge: 7 * 24 * 60 * 60 * 1000,
+            maxAge: 30 * 24 * 60 * 60 * 1000,
             partitioned: isProduction
         };
 

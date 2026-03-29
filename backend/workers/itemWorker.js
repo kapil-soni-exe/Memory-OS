@@ -102,7 +102,7 @@ ${(relationships || [])
             itemId: item._id.toString(),
             title: item.title,
             summary: summary,
-            user: userId,
+            user: userId.toString(),
             clusterId
           },
         }],
@@ -116,7 +116,8 @@ ${(relationships || [])
         userId,
         clusterId,
         itemId: item._id,
-        tags: tags || []
+        tags: tags || [],
+        embedding
       }).catch(err => console.error("[Worker] Topic sync error:", err.message));
     }
 
@@ -144,7 +145,10 @@ ${(relationships || [])
   }
 }, {
   connection: redisConnection,
-  concurrency: 5
+  concurrency: 2,           // Reduced from 5 to lower Redis pressure
+  stalledInterval: 30000,   // Check stalled jobs every 30s (default: 5s) — saves ~80% BullMQ polls
+  lockDuration: 60000,      // Lock job for 60s before considering stalled
+  lockRenewTime: 30000,     // Renew lock every 30s
 });
 
 console.log('✅ [Worker] Background processor started and ready');

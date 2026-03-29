@@ -15,7 +15,7 @@ export const detectClusterByEmbedding = async (embedding, userId) => {
         must: [
           {
             key: "user",
-            match: { value: userId },
+            match: { value: userId.toString() },
           },
         ],
       },
@@ -24,9 +24,8 @@ export const detectClusterByEmbedding = async (embedding, userId) => {
     if (results && results.length > 0) {
       const bestMatch = results[0];
       
-      // Check if the similarity score is above our threshold
-      // Qdrant usually returns cosine similarity (-1 to 1) when configured for it
-      if (bestMatch.score > 0.5 && bestMatch.payload?.clusterId) {
+      // Check if the score is above threshold (0.78 for broader clustering)
+      if (bestMatch.score > 0.78 && bestMatch.payload?.clusterId) {
         return bestMatch.payload.clusterId;
       }
     }

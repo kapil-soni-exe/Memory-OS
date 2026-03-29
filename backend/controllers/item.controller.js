@@ -173,8 +173,26 @@ export const saveItem = async (req, res) => {
     });
 
   } catch (error) {
+    console.error(`[API] ❌ Save Item Error:`, error);
+    
+    // Handle Duplicate Key Error (Mongo 11000)
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "You've already saved this memory! Check your library.",
+        error: "duplicate_url"
+      });
+    }
+
+    // Handle Mongoose Validation Error
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: Object.values(error.errors).map(val => val.message).join(', ')
+      });
+    }
+
     res.status(500).json({
-      message: error.message,
+      message: "An internal error occurred while saving. Please try again.",
+      error: error.message
     });
   }
 };
@@ -187,6 +205,7 @@ export const getAllItems = async (req, res) => {
     // Optimization: Exclude large 'content' field for list view
     const items = await Item.find({ user: req.user })
       .select("-content")
+      .populate("topicId", "topicName")
       .sort({ createdAt: -1 })
       .lean();
 

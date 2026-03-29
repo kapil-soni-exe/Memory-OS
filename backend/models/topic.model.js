@@ -17,21 +17,63 @@ const topicSchema = new mongoose.Schema(
 
     topicName: {
       type: String,
-      required: true
+      required: true,
+      trim: true
+    },
+
+    parentTopicId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Topic",
+      default: null,
+      index: true
+    },
+
+    level: {
+      type: Number,
+      default: 1,
+      max: 3 // Avoid runaway nesting
+    },
+
+    confidence: {
+      type: Number,
+      default: 0
+    },
+
+    reason: {
+      type: String,
+      default: ""
+    },
+
+    isMerged: {
+      type: Boolean,
+      default: false
+    },
+
+    centroid: {
+      type: [Number],
+      default: []
+    },
+
+    tags: {
+      type: [String],
+      default: []
     },
 
     itemCount: {
       type: Number,
       default: 1
-    },
-
-    keywords: {
-      type: [String],
-      default: []
     }
   },
-  { timestamps: true }
+  {
+    timestamps: true
+  }
 );
+
+//  PREVENT DUPLICATE TOPICS (VERY IMPORTANT)
+topicSchema.index({ user: 1, clusterId: 1 }, { unique: true });
+
+// Unified index for user-specific hierarchical lookups
+topicSchema.index({ user: 1, parentTopicId: 1 });
 
 const Topic = mongoose.model("Topic", topicSchema);
 

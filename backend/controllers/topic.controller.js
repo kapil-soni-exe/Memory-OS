@@ -18,11 +18,11 @@ export const getTopicById = async (req, res) => {
   try {
     const topicId = req.params.id;
 
-    // 1. Fetch topic and items in parallel for performance
-    // Use .lean() for faster execution as these are read-only
-    const [topic, items] = await Promise.all([
-      Topic.findOne({ _id: topicId, user: req.user }).lean(),
-      Item.find({ user: req.user, topicId }).sort({ createdAt: -1 }).lean()
+    // 1. Fetch topic (with parent info), items, and sub-topics in parallel
+    const [topic, items, subTopics] = await Promise.all([
+      Topic.findOne({ _id: topicId, user: req.user }).populate("parentTopicId", "topicName").lean(),
+      Item.find({ user: req.user, topicId }).sort({ createdAt: -1 }).lean(),
+      Topic.find({ user: req.user, parentTopicId: topicId }).sort({ topicName: 1 }).lean()
     ]);
 
     // 2. Security/Existence check
@@ -32,9 +32,9 @@ export const getTopicById = async (req, res) => {
       });
     }
 
-    // 3. Fallback for items that might only have clusterId
+    // 3. Fallback for items that might only have clusterId (legacy compatibility)
     let finalItems = items;
-    if (items.length === 0 && topic.clusterId) {
+    if (items.length === 0 && topic.clusterId && subTopics.length === 0) {
       finalItems = await Item.find({ 
         user: req.user, 
         clusterId: topic.clusterId
@@ -43,7 +43,8 @@ export const getTopicById = async (req, res) => {
 
     res.status(200).json({
       topic,
-      items: finalItems
+      items: finalItems,
+      subTopics // New field for hierarchical UI
     });
   } catch (error) {
     res.status(500).json({
@@ -66,7 +67,7 @@ export const deleteTopic = async (req, res) => {
     const items = await Item.find({ user: req.user, clusterId });
     const vectorIds = items.map(i => i.vectorId).filter(id => !!id);
 
-    // 2. Delete vectors from Qdrant
+    // 3. Delete from items_vectors
     if (vectorIds.length > 0) {
       const qdrant = (await import("../config/qdrant.js")).default;
       try {
@@ -74,17 +75,32 @@ export const deleteTopic = async (req, res) => {
           points: vectorIds,
         });
       } catch (qError) {
-        console.error("Qdrant bulk delete failed:", qError.message);
+        console.error("Qdrant items bulk delete failed:", qError.message);
       }
     }
 
-    // 3. Delete items from DB
+    // 4. Delete the topic vector itself from topics_vectors
+    const qdrant = (await import("../config/qdrant.js")).default;
+    const { v5: uuidv5 } = await import("uuid");
+    const TOPIC_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
+    const topicVectorId = uuidv5(topic._id.toString(), TOPIC_NAMESPACE);
+
+    try {
+      await qdrant.delete("topics_vectors", {
+        points: [topicVectorId],
+      });
+      console.log(`[TopicEngine] Deleted topic vector ${topicVectorId} from Qdrant`);
+    } catch (qError) {
+      console.error("Qdrant topic vector delete failed:", qError.message);
+    }
+
+    // 5. Delete items from DB
     await Item.deleteMany({ user: req.user, clusterId });
 
-    // 4. Delete the topic itself
+    // 6. Delete the topic itself from MongoDB
     await Topic.findByIdAndDelete(topic._id);
 
-    res.json({ message: "Topic and all associated memories deleted" });
+    res.json({ message: "Topic and all associated memories deleted from DB and Galaxy" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
