@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import KnowledgeGraph from '../../modules/graph/components/KnowledgeGraph';
 import SaveModal from '../../modules/items/components/SaveModal/SaveModal';
 import { useItemsQuery } from '../../modules/items/hooks/useItemsQuery';
+import { useTopicsQuery } from '../../modules/items/hooks/useTopicsQuery';
 import useGraphDataBuilder from '../../modules/graph/hooks/useGraphDataBuilder';
 import useGraphView from '../../modules/graph/hooks/useGraphView';
 import useGraphNavigation from '../../modules/graph/hooks/useGraphNavigation';
@@ -13,31 +14,9 @@ const KnowledgeGraphPage = () => {
   const navigate = useNavigate();
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   
-  // Step 3: FETCH ITEMS
+  // Step 3: FETCH ITEMS & TOPICS (API directly)
   const { data: items = [], isLoading: itemsLoading } = useItemsQuery();
-  
-  // Step 4: DERIVE TOPICS FROM ITEMS
-  const topics = React.useMemo(() => {
-    const map = new Map();
-
-    items.forEach(item => {
-      if (item.topicId) {
-        const tid = typeof item.topicId === "object"
-          ? item.topicId._id
-          : item.topicId;
-
-        const name = typeof item.topicId === "object"
-          ? item.topicId.topicName
-          : "Untitled";
-
-        if (!map.has(tid)) {
-          map.set(tid, { _id: tid, topicName: name });
-        }
-      }
-    });
-
-    return Array.from(map.values());
-  }, [items]);
+  const { data: topics = [], isLoading: topicsLoading } = useTopicsQuery();
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -58,7 +37,7 @@ const KnowledgeGraphPage = () => {
     handleBack 
   } = useGraphNavigation(navigate);
 
-  const loading = itemsLoading;
+  const loading = itemsLoading || topicsLoading;
 
   const fullGraphData = useGraphDataBuilder(items, topics, loading);
   const visibleGraph = useGraphView(fullGraphData, level, selectedNode);
