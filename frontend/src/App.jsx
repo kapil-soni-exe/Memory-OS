@@ -9,13 +9,13 @@ import TopicsPage from './pages/Topics/TopicsPage';
 import TopicDetail from './pages/Topics/TopicDetail';
 import KnowledgeGraphPage from './pages/KnowledgeGraph/KnowledgeGraphPage';
 import SaveItem from './pages/SaveItem/SaveItem';
-import PlaceholderPage from './pages/Placeholder/Placeholder';
+import SecondDraftPage from './pages/SecondDraft/SecondDraftPage';
+import SettingsPage from './pages/Settings/SettingsPage';
 
 import { AuthProvider } from './context/AuthContext';
-import { ItemsProvider } from './context/ItemsContext';
 import ProtectedRoute from './routes/ProtectedRoute';
 
-import { useAuth } from './features/auth/hooks/useAuth';
+import { useAuth } from './modules/auth/hooks/useAuth';
 import LoadingScreen from './components/common/LoadingScreen/LoadingScreen';
 
 function AppRouter() {
@@ -51,7 +51,8 @@ function AppRouter() {
           <Route path="/topics" element={<TopicsPage />} />
           <Route path="/topics/:topicName" element={<TopicDetail />} />
           <Route path="/graph" element={<KnowledgeGraphPage />} />
-          <Route path="/settings" element={<PlaceholderPage title="Settings" />} />
+          <Route path="/composer" element={<SecondDraftPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -64,9 +65,7 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ItemsProvider>
-          <AppRouter />
-        </ItemsProvider>
+        <AppRouter />
       </AuthProvider>
     </ThemeProvider>
   );
