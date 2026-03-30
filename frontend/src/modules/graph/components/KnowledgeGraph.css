@@ -1,0 +1,384 @@
+.knowledge-graph-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: var(--color-bg);
+  overflow: hidden;
+  cursor: grab;
+}
+
+.knowledge-graph-container:active {
+  cursor: grabbing;
+}
+
+.link {
+  stroke: var(--color-border);
+  stroke-opacity: 0.2;
+  stroke-width: 1px;
+  transition: stroke-opacity 0.4s ease, stroke 0.4s ease, stroke-width 0.4s ease;
+  pointer-events: none;
+}
+
+.cluster-hull {
+  fill-opacity: 0.15;
+  stroke-width: 2px;
+  stroke-opacity: 0.2;
+  stroke: inherit;
+  filter: blur(25px);
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+.link.highlighted {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.8;
+  stroke-width: 2px;
+}
+
+.link.dimmed {
+  stroke-opacity: 0.05;
+}
+
+.link.hover-highlight {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.6;
+  stroke-width: 1.5px;
+}
+
+.node {
+  transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  cursor: pointer;
+}
+
+.node circle {
+  stroke: var(--color-bg);
+  stroke-width: 1.5px;
+  transition: r var(--ease-spring), stroke-width var(--ease-base), fill var(--ease-base), filter var(--ease-base);
+}
+
+.node.selected circle {
+  stroke: #fffffe;
+  stroke-width: 2.5px;
+  filter: brightness(1.2) drop-shadow(0 0 12px rgba(255, 255, 255, 0.4));
+}
+
+.node.highlighted circle {
+  filter: brightness(1.1);
+  stroke-width: 2px;
+}
+
+.node.hovered circle {
+  transform: scale(1.1);
+  filter: brightness(1.2);
+}
+
+.node.dimmed {
+  opacity: 0.12;
+  filter: grayscale(0.5);
+}
+
+.node-halo {
+  fill: none;
+  stroke: inherit;
+  stroke-width: 2px;
+  stroke-opacity: 0.15;
+  transition: stroke-opacity 0.4s ease, stroke-width 0.4s ease;
+  pointer-events: none;
+}
+
+.node.selected .node-halo {
+  stroke-opacity: 0.6;
+  animation: halo-pulse 2s infinite ease-in-out;
+}
+
+/* Topic → Item link: solid, stronger */
+.link.topic-link {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.35;
+  stroke-width: 1.5px;
+}
+
+.link.topic-link.highlighted {
+  stroke-opacity: 0.9;
+  stroke-width: 2.5px;
+}
+
+/* Item → Item semantic link: dashed, lighter */
+.link.semantic-link {
+  stroke: #007aff;
+  stroke-opacity: 0.12;
+  stroke-dasharray: 4 3;
+  stroke-width: 1px;
+}
+
+.link.semantic-link.highlighted {
+  stroke-opacity: 0.5;
+  stroke-width: 1.5px;
+}
+
+/* Item → Entity connection: very subtle dot */
+/* 🔥 Link Refinement System */
+.link {
+  fill: none;
+  stroke: var(--color-text-tertiary);
+  stroke-opacity: 0.15;
+  stroke-width: 1px;
+  transition: stroke-opacity 0.4s ease, stroke 0.4s ease, stroke-width 0.4s ease;
+  pointer-events: none;
+}
+
+/* Topic → Item link: subtle curve, brand-aligned */
+.link.topic-link {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.25;
+  stroke-width: 1.2px;
+}
+
+/* Topic → Subtopic hierarchical link: strong, distinct */
+.link.topic-hierarchy-link {
+  stroke: #F72585; 
+  stroke-opacity: 0.5;
+  stroke-width: 2px;
+  stroke-dasharray: 6 4;
+}
+.link.topic-hierarchy-link.highlighted {
+  stroke-opacity: 0.9;
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 3px rgba(247, 37, 133, 0.5));
+}
+
+/* Item → Item/Topic semantic link: brighter + dashed */
+.link.semantic-link {
+  stroke: #007aff;
+  stroke-opacity: 0.3;
+  stroke-dasharray: 4 4;
+  stroke-width: 1.5px;
+}
+
+/* Item → Entity links: thin + light */
+.link.item-entity-link {
+  stroke: #94a3b8;
+  stroke-opacity: 0.12;
+  stroke-width: 0.8px;
+}
+
+/* Focused State */
+.link.active-path {
+  stroke-opacity: 0.9;
+  stroke-width: 2.5px;
+  stroke-dasharray: 8 8;
+  animation: path-flow 2s infinite linear;
+  filter: brightness(1.2) drop-shadow(0 0 2px rgba(127, 90, 240, 0.4));
+}
+
+@keyframes path-flow {
+  from { stroke-dashoffset: 16; }
+  to { stroke-dashoffset: 0; }
+}
+
+.link.highlighted {
+  stroke-opacity: 0.8;
+  stroke-width: 2px;
+  filter: brightness(1.3);
+}
+
+.link.dimmed {
+  stroke-opacity: 0.03;
+}
+
+/* 🚀 Smart Context Tooltip */
+.graph-tooltip {
+  position: absolute;
+  z-index: 1000;
+  min-width: 200px;
+  max-width: 300px;
+  padding: 16px;
+  background: rgba(15, 15, 20, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(127, 90, 240, 0.25);
+  border-radius: 16px;
+  color: white;
+  pointer-events: none;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.6);
+  transform-origin: bottom center;
+  will-change: transform, opacity;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.graph-tooltip.important {
+  border-color: rgba(127, 90, 240, 0.5);
+  box-shadow: 0 0 20px rgba(127, 90, 240, 0.15), 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.important-badge {
+  display: inline-flex;
+  padding: 4px 8px;
+  background: linear-gradient(135deg, #7F5AF0, #007aff);
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  color: white;
+}
+
+.tooltip-header {
+  margin-bottom: 8px;
+}
+
+.node-type {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #7F5AF0;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.node-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 2px 0 0 0;
+  color: white;
+}
+
+.node-summary {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.tooltip-footer {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.connection-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.connection-count .count {
+  font-size: 16px;
+  font-weight: 800;
+  color: #007aff;
+}
+
+.connection-count .label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+/* Hover preview effect */
+.link.hover-highlight {
+  stroke: #7F5AF0;
+  stroke-opacity: 0.6;
+  stroke-width: 1.5px;
+}
+
+.node.topic.main .node-halo {
+  stroke-opacity: 0.3;
+  animation: halo-pulse 2s infinite ease-in-out;
+}
+
+.node-halo {
+  fill: none;
+  stroke: #7F5AF0;
+  stroke-width: 1px;
+  stroke-opacity: 0;
+  pointer-events: none;
+  transition: stroke-opacity 0.6s ease, stroke-width 0.6s ease;
+}
+
+.node.selected .node-halo,
+.node.highlighted .node-halo {
+  stroke-opacity: 0.3;
+  animation: halo-pulse 3s infinite ease-in-out;
+}
+
+.node.selected .node-halo {
+  stroke-opacity: 0.6;
+  stroke-width: 2px;
+}
+
+@keyframes halo-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.2;
+  }
+}
+
+.node-label {
+  font-size: 8px;
+  font-weight: 600;
+  fill: var(--color-text-primary);
+  pointer-events: none;
+  transition: opacity 0.3s ease, font-size 0.3s ease, filter 0.3s ease;
+  user-select: none;
+  opacity: 0; /* 🚀 Hidden by default */
+}
+
+/* 🚀 Progressive Disclosure Rules */
+.node.highlighted .node-label,
+.node.selected .node-label,
+.node.hovered .node-label,
+svg.zoom-high .node-label {
+  opacity: 1 !important;
+}
+
+svg.zoom-high .node-label {
+  opacity: 0.6 !important; /* Slightly softer for mass zoom disclosure */
+}
+
+svg.zoom-high .node.selected .node-label,
+svg.zoom-high .node.hovered .node-label {
+  opacity: 1 !important; /* Full punch for active elements */
+}
+
+/* Ensure Topic labels are slightly larger and always readable */
+.node.topic .node-label {
+  font-size: 9px;
+  fill: var(--color-bg);
+}
+
+.node.topic.selected .node-label {
+  font-size: 12px;
+}
+
+/* Redundant content removed by consolidation */
+
+.tooltip-header h4 {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+.tooltip-summary {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--sp-2);
+}
+
+.tooltip-footer {
+  font-size: 10px;
+  color: var(--color-text-tertiary);
+  font-weight: 600;
+}
