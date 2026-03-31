@@ -11,10 +11,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const data = await getCurrentUser();
+        // Timeout: Render free tier cold starts can take 30-60s.
+        // We give it 8s max — if no response, treat user as logged out.
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Auth check timeout')), 8000)
+        );
+        const data = await Promise.race([getCurrentUser(), timeoutPromise]);
         setUser(data.user);
       } catch (err) {
-        // Not authenticated
+        // Not authenticated OR backend is cold starting — either way, show the app
         setUser(null);
       } finally {
         setLoading(false);
