@@ -78,7 +78,7 @@ const SecondDraftEditor = ({
   }, [synthesizeMutation.isSuccess, synthesizeMutation.data, synthesizeMutation.variables, setContent, setLastAnalyzedPrompt]);
 
   // Compute loading state locally
-  const isPending = preFetchMutation.isPending || synthesizeMutation.isPending || saveMutation.isPending;
+  const isGenerating = preFetchMutation.isPending || synthesizeMutation.isPending || saveMutation.isPending;
 
   // Auto-resize prompt textarea
   useEffect(() => {
@@ -90,12 +90,12 @@ const SecondDraftEditor = ({
 
   /* ── Handlers ── */
   const handlePreFetch = () => {
-    if (!prompt.trim() || isPending) return;
+    if (!prompt.trim() || isGenerating) return;
     preFetchMutation.mutate(prompt);
   };
 
   const handleSynthesize = () => {
-    if (isPending) return;
+    if (isGenerating) return;
     setContent('');
     setStep(3);
     synthesizeMutation.mutate({ 
@@ -106,7 +106,7 @@ const SecondDraftEditor = ({
   };
 
   const handleRefine = (instructions) => {
-    if (!instructions?.trim() || isPending) return;
+    if (!instructions?.trim() || isGenerating) return;
     synthesizeMutation.mutate({
       prompt, format,
       selectedIds: selectedSourceIds,
@@ -116,7 +116,7 @@ const SecondDraftEditor = ({
   };
 
   const handleSave = () => {
-    if (!content || isPending) return;
+    if (!content || isGenerating) return;
     saveMutation.mutate({
       title: `${format} Draft: ${prompt.slice(0, 30)}...`,
       content: content,
@@ -347,7 +347,7 @@ const SecondDraftEditor = ({
           disabled={isGenerating || !prompt.trim()}
           title={step === 1 ? "Analyze Memories" : "Generate Draft"}
         >
-          {isPending
+          {isGenerating
             ? <Loader2 size={14} className="sde-spin" />
             : step === 1 
               ? <><Wand2 size={14} /> <span>Analyze</span></>
