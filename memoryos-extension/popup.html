@@ -4,50 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="popup.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="galaxy-theme">
-    <div class="popup-container glass">
-        <header>
+    <div class="popup-container">
+        <!-- Background decorative elements -->
+        <div class="bg-glow"></div>
+        <div class="bg-glow bg-glow-secondary"></div>
+
+        <header class="glass-header">
             <div class="logo-area">
-                <div class="galaxy-orb"></div>
+                <div class="galaxy-orb">
+                    <div class="orb-core"></div>
+                </div>
                 <h1>MemoryOS</h1>
             </div>
             <div class="header-right">
-                <span class="status-badge" id="auth-status">Online</span>
-                <a href="#" id="open-dashboard" class="tiny-link">Dashboard ↗</a>
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text" id="auth-status">Online</span>
+                </div>
+                <a href="#" id="open-dashboard" class="dashboard-link" title="Open Dashboard">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
             </div>
         </header>
 
-        <main>
-            <div class="item-preview">
-                <h2 id="title-preview">Loading Page...</h2>
-                <p id="url-preview"></p>
+        <main class="content-wrapper">
+            <div class="preview-card glass-panel">
+                <div class="preview-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                </div>
+                <div class="preview-details">
+                    <h2 id="title-preview">Analyzing Nexus...</h2>
+                    <p id="url-preview" class="url-text"></p>
+                </div>
             </div>
 
             <div class="input-group">
-                <label>Add Tags</label>
-                <input type="text" id="tags" placeholder="e.g. research, productivity, ai">
+                <label>Knowledge Tags</label>
+                <div class="input-wrapper">
+                    <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                    <input type="text" id="tags" autocomplete="off" placeholder="AI, research, productivity...">
+                    <div class="input-border"></div>
+                </div>
             </div>
 
             <div class="input-group">
-                <label>Custom Summary</label>
-                <textarea id="summary" placeholder="What's this about?"></textarea>
+                <label>AI Summary <span class="badge-auto">Auto</span></label>
+                <div class="input-wrapper textarea-wrapper">
+                    <textarea id="summary" placeholder="Memory context will appear here..."></textarea>
+                    <div class="input-border"></div>
+                </div>
             </div>
 
             <div class="action-row">
-                <button id="discard-btn" class="secondary-btn">Discard</button>
-                <button id="save-btn" class="primary-btn">
-                    <span class="btn-text">Add to Galaxy</span>
+                <button id="discard-btn" class="btn btn-ghost">Discard</button>
+                <button id="save-btn" class="btn btn-primary">
+                    <span class="btn-text">Capture Memory</span>
+                    <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     <div class="btn-glow"></div>
                 </button>
             </div>
         </main>
 
-        <footer id="status-message">
-            Ready to capture.
+        <footer id="status-message" class="status-footer">
+            Ready to initialize capture.
         </footer>
     </div>
-    <script src="config.js"></script>
     <script src="popup.js"></script>
 </body>
 </html>

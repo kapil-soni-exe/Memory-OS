@@ -1,0 +1,75 @@
+/* ============================================
+   SECOND DRAFT PAGE — Layout
+   ============================================ */
+
+.second-draft-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.second-draft-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.second-draft-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.composer-container {
+  flex: 1;
+  overflow: hidden;
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+}
+
+.composer-workspace {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--sp-4);
+  min-height: 0;
+}
+
+.editor-region {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.editor-region>* {
+  height: 100%;
+}
+
+.source-region {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.source-region>* {
+  height: 100%;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .composer-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+
+  .source-region {
+    max-height: 260px;
+  }
+}

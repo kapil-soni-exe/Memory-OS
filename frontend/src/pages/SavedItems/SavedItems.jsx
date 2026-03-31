@@ -8,7 +8,7 @@ import SaveModal from '../../modules/items/components/SaveModal/SaveModal';
 import { useItemsQuery } from '../../modules/items/hooks/useItemsQuery';
 import { useDeleteItem } from '../../modules/items/hooks/useItemMutation';
 import { useSearchQuery } from '../../modules/items/hooks/useSearchQuery';
-import MobileNav from '../../layouts/MobileNav/MobileNav';
+
 import useItemFilter from '../../modules/items/hooks/useItemFilter';
 import './SavedItems.css';
 
