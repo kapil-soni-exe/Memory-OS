@@ -115,12 +115,17 @@ export const loginUser = async (req, res) => {
  */
 export const logoutUser = async (req, res) => {
     try {
-        res.clearCookie("token", {
+        // clearCookie alone is unreliable for partitioned/cross-domain cookies.
+        // We overwrite the cookie with empty value + maxAge 0 to force instant expiry.
+        const expireOptions = {
             httpOnly: true,
             secure: true,
             sameSite: "none",
-            partitioned: true
-        });
+            partitioned: true,
+            maxAge: 0
+        };
+        res.cookie("token", "", expireOptions);
+        res.clearCookie("token", expireOptions);
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed" });

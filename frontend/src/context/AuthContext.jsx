@@ -63,8 +63,13 @@ export const AuthProvider = ({ children }) => {
     try {
       await logoutUser();
       setUser(null);
+      // Hard redirect: clears ALL React state + TanStack Query cache
+      // This is the most reliable way to guarantee full session teardown
+      window.location.href = '/login';
     } catch (err) {
       console.error('Logout failed:', err);
+      setUser(null);
+      window.location.href = '/login'; // Force logout even if API call fails
     } finally {
       setLoading(false);
     }

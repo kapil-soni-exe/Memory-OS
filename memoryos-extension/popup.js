@@ -58,9 +58,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   const authHeader = await getAuthHeader();
-  const isAuth = !!authHeader.Authorization;
 
-  // UI Status Update based on Auth
+  // Verify token is ACTUALLY valid by calling the backend (not just checking cookie presence)
+  let isAuth = false;
+  if (authHeader.Authorization) {
+    try {
+      const verifyRes = await fetch(`${CONFIG.API_URL}/auth/me`, {
+        method: "GET",
+        headers: { ...authHeader },
+        credentials: "include"
+      });
+      isAuth = verifyRes.ok; // true only if backend returns 200
+    } catch (e) {
+      isAuth = false; // network error = treat as logged out
+    }
+  }
+
+  // UI Status Update based on VERIFIED Auth
   const authStatusEl = document.getElementById("auth-status");
   const pulseDot = document.querySelector(".pulse-dot");
   if (!isAuth) {
