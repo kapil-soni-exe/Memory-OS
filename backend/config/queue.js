@@ -4,8 +4,8 @@ import redisConnection from './redis.js';
 export const itemQueue = new Queue('item-processing', {
   connection: redisConnection,
   defaultJobOptions: {
-    removeOnComplete: 20,  // Keep only last 20 completed jobs
-    removeOnFail: 20,      // Keep only last 20 failed jobs
+    removeOnComplete: true, // Immediate cleanup: Massive request savings
+    removeOnFail: true,     // Immediate cleanup: Massive request savings 
     attempts: 2,
     backoff: { type: 'exponential', delay: 5000 },
   }

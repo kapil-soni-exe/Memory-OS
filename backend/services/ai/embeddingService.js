@@ -22,11 +22,16 @@ export const generateEmbedding = async (text, inputType = "document") => {
 
     const inputText = text.trim().slice(0, 4000); // Voyage supports larger context
 
-    // 1. Check Cache
-    const hash = crypto.createHash('md5').update(`${inputText}:${inputType}`).digest('hex');
-    const cacheKey = `embedding:cache:${hash}`;
-    const cached = await redisConnection.get(cacheKey);
-    if (cached) return JSON.parse(cached);
+    // 1. Check Cache (Optional)
+    let cacheKey;
+    try {
+      const hash = crypto.createHash('md5').update(`${inputText}:${inputType}`).digest('hex');
+      cacheKey = `embedding:cache:${hash}`;
+      const cached = await redisConnection.get(cacheKey);
+      if (cached) return JSON.parse(cached);
+    } catch (redisErr) {
+      console.warn(`[Redis] Cache lookup skipped: ${redisErr.message}`);
+    }
 
     // 2. Direct Voyage AI Call
     console.log(`[Voyage AI] Generating embedding for: "${inputText.slice(0, 30)}..."`);
@@ -49,9 +54,12 @@ export const generateEmbedding = async (text, inputType = "document") => {
       const embedding = data.data?.[0]?.embedding || null;
       
       if (embedding && embedding.length === 1024) {
-        // Save to Cache
-        await redisConnection.set(cacheKey, JSON.stringify(embedding), 'EX', CACHE_TTL);
-        // Embedding generated successfully
+        // Save to Cache (Optional)
+        try {
+          await redisConnection.set(cacheKey, JSON.stringify(embedding), 'EX', CACHE_TTL);
+        } catch (setErr) {
+          console.warn(`[Redis] Cache set skipped: ${setErr.message}`);
+        }
         return embedding;
       } else {
         console.error("[Voyage AI] Dimension Mismatch or Empty Result");

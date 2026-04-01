@@ -52,55 +52,80 @@ export const getTopicById = async (req, res) => {
     });
   }
 };
-// Delete Topic and all associated Items
+// Delete Topic and all associated Items (Hierarchical/Recursive)
 export const deleteTopic = async (req, res) => {
   try {
-    const topic = await Topic.findOne({ _id: req.params.id, user: req.user });
+    const targetTopicId = req.params.id;
+    const userId = req.user.toString();
 
-    if (!topic) {
-      return res.status(404).json({ message: "Topic not found" });
-    }
+    // 1. Fetch the entire hierarchy (Max Level 3)
+    const level1 = await Topic.findOne({ _id: targetTopicId, user: req.user });
+    if (!level1) return res.status(404).json({ message: "Topic not found" });
 
-    const { clusterId } = topic;
+    const level2 = await Topic.find({ parentTopicId: targetTopicId, user: req.user });
+    const level2Ids = level2.map(t => t._id);
+    
+    const level3 = await Topic.find({ parentTopicId: { $in: level2Ids }, user: req.user });
 
-    // 1. Find all items in this cluster
-    const items = await Item.find({ user: req.user, clusterId });
-    const vectorIds = items.map(i => i.vectorId).filter(id => !!id);
+    const allTopics = [level1, ...level2, ...level3];
+    const topicIds = allTopics.map(t => t._id.toString());
+    const clusterIds = allTopics.map(t => t.clusterId).filter(id => !!id);
 
-    // 3. Delete from items_vectors
-    if (vectorIds.length > 0) {
-      const qdrant = (await import("../config/qdrant.js")).default;
-      try {
-        await qdrant.delete("items_vectors", {
-          points: vectorIds,
-        });
-      } catch (qError) {
-        console.error("Qdrant items bulk delete failed:", qError.message);
-      }
-    }
+    console.log(`[TopicEngine] 🧨 Deep Purging Topic Tree: ${level1.topicName} (${topicIds.length} topics, ${clusterIds.length} clusters)`);
 
-    // 4. Delete the topic vector itself from topics_vectors
+    // 2. Robust Vector Cleanup (Search & Destroy)
     const qdrant = (await import("../config/qdrant.js")).default;
-    const { v5: uuidv5 } = await import("uuid");
-    const TOPIC_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
-    const topicVectorId = uuidv5(topic._id.toString(), TOPIC_NAMESPACE);
 
     try {
+      // A. Delete all topic vectors in the tree
       await qdrant.delete("topics_vectors", {
-        points: [topicVectorId],
+        filter: {
+          must: [
+            {
+              key: "user",
+              match: { value: userId }
+            },
+            {
+              key: "topicId",
+              match: { any: topicIds }
+            }
+          ]
+        }
       });
-      console.log(`[TopicEngine] Deleted topic vector ${topicVectorId} from Qdrant`);
+      console.log(`   ✅ All ${topicIds.length} topic vectors purged from topics_vectors`);
+
+      // B. Delete all item vectors for all clusters in the tree
+      await qdrant.delete("items_vectors", {
+        filter: {
+          must: [
+            {
+              key: "user",
+              match: { value: userId }
+            },
+            {
+              key: "clusterId",
+              match: { any: clusterIds }
+            }
+          ]
+        }
+      });
+      console.log(`   ✅ All items vectors for ${clusterIds.length} clusters purged from items_vectors`);
+
     } catch (qError) {
-      console.error("Qdrant topic vector delete failed:", qError.message);
+      console.error(`[TopicEngine] ❌ Qdrant sync failure: ${qError.message}`);
     }
 
-    // 5. Delete items from DB
-    await Item.deleteMany({ user: req.user, clusterId });
+    // 3. Delete from MongoDB
+    const deleteItemsResult = await Item.deleteMany({ user: req.user, clusterId: { $in: clusterIds } });
+    const deleteTopicsResult = await Topic.deleteMany({ _id: { $in: topicIds }, user: req.user });
 
-    // 6. Delete the topic itself from MongoDB
-    await Topic.findByIdAndDelete(topic._id);
+    console.log(`[TopicEngine] 🗑️  MongoDB: Deleted ${deleteTopicsResult.deletedCount} topics and ${deleteItemsResult.deletedCount} items.`);
 
-    res.json({ message: "Topic and all associated memories deleted from DB and Galaxy" });
+    res.json({ 
+      message: `Topic tree '${level1.topicName}' and all associated contents deleted.`,
+      deletedTopics: deleteTopicsResult.deletedCount,
+      deletedItems: deleteItemsResult.deletedCount
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

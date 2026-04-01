@@ -52,18 +52,28 @@ export const extractItem = async (req, res) => {
 
 export const saveItem = async (req, res) => {
   try {
-    const { 
-      url: providedUrl, 
-      content: providedContent, 
-      title: providedTitle, 
-      type: providedType, 
+    let {
+      url: providedUrl,
+      content: providedContent,
+      title: providedTitle,
+      type: providedType,
       tags: providedTags,
       summary: providedSummary,
       image: providedImage,
       author: providedAuthor,
       source: providedSource,
-      relatedItems 
+      relatedItems,
+      input: providedInput // Fallback for clients sending 'input' instead of content/url
     } = req.body;
+
+    // Handle 'input' alias
+    if (providedInput && !providedUrl && !providedContent) {
+      if (providedInput.trim().startsWith("http")) {
+        providedUrl = providedInput.trim();
+      } else {
+        providedContent = providedInput.trim();
+      }
+    }
 
     let finalItemData = {
       user: req.user,
@@ -85,7 +95,7 @@ export const saveItem = async (req, res) => {
         author: providedAuthor,
         source: providedSource || "manual"
       };
-    } 
+    }
     // 2. Handle File Upload
     else if (req.file) {
       const filePath = req.file.path;
@@ -117,7 +127,7 @@ export const saveItem = async (req, res) => {
           source: "manual"
         };
       }
-    } 
+    }
     // 3. Fallback: Quick Save (direct capture without explicit preview)
     else {
       const input = (providedUrl || providedContent || "").trim();
@@ -174,7 +184,7 @@ export const saveItem = async (req, res) => {
 
   } catch (error) {
     console.error(`[API] ❌ Save Item Error:`, error);
-    
+
     // Handle Duplicate Key Error (Mongo 11000)
     if (error.code === 11000) {
       return res.status(400).json({
@@ -256,25 +266,40 @@ export const deleteItem = async (req, res) => {
       });
     }
 
-    // 1. Sync with Vector Database (Qdrant)
+    // 1. Sync with Vector Database (Qdrant) - "Search & Destroy" Strategy
     try {
-      if (item.vectorId) {
-        await qdrant.delete("items_vectors", {
-          points: [item.vectorId],
-        });
-      }
+      const itemIdStr = item._id.toString();
+      console.log(`[Qdrant] 🔍 Searching for vectors belonging to memory ${itemIdStr}...`);
 
-      // Secondary safety check: delete by itemId payload to ensure no orphans
-      await qdrant.delete("items_vectors", {
+      // Find all points associated with this itemId
+      const scrollResult = await qdrant.scroll("items_vectors", {
         filter: {
-          must: [{
-            key: "itemId",
-            match: { value: item._id.toString() }
-          }]
-        }
+          must: [
+            {
+              key: "itemId",
+              match: { value: itemIdStr }
+            }
+          ]
+        },
+        limit: 10,
+        with_payload: false,
+        with_vector: false
       });
+
+      const foundPointIds = scrollResult.points.map(p => p.id);
+
+      if (foundPointIds.length > 0) {
+        console.log(`[Qdrant] 🗑️ Found ${foundPointIds.length} vectors. Deleting...`);
+        await qdrant.delete("items_vectors", {
+          wait: true,
+          points: foundPointIds
+        });
+      } else {
+        console.log("[Qdrant] ℹ️  No vectors found for this memory. Skipping Qdrant sync.");
+      }
     } catch (qdrantError) {
-      console.error("Failed to delete vector from Qdrant:", qdrantError.message);
+      const details = qdrantError.response?.data?.status?.error || qdrantError.message;
+      console.error(`[Qdrant] ❌ Sync failure: ${details}`);
     }
 
     // 2. Sync with Topic Engine

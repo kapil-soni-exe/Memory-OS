@@ -3,6 +3,34 @@ import bcrypt from "bcryptjs"
 import User from "../models/user.model.js"
 
 /**
+ * Centralized Cookie Strategy
+ * Ensuring 100% attribute parity between Login and Logout to prevent "Zombie Cookies".
+ * partitioned: true is required for the Chrome Extension to access the cookie in a cross-site context.
+ */
+const getCookieOptions = (isLogout = false) => {
+    const baseOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        partitioned: true,
+    };
+
+    if (isLogout) {
+        return {
+            ...baseOptions,
+            maxAge: 0,
+            expires: new Date(0), // Force immediate expiration
+        };
+    }
+
+    return {
+        ...baseOptions,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 Days
+    };
+};
+
+/**
  * User Registration
  * Validates input, hashes password, and sets a secure JWT cookie.
  */
@@ -37,15 +65,7 @@ import User from "../models/user.model.js"
       { expiresIn: "30d" }
     );
 
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      partitioned: true
-    };
-
-    res.cookie("token", token, cookieOptions);
+    res.cookie("token", token, getCookieOptions());
 
     res.status(201).json({
       message: "Welcome to MemoryOS!",
@@ -85,15 +105,7 @@ export const loginUser = async (req, res) => {
             { expiresIn: "30d" }
         );
 
-        const cookieOptions = {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            maxAge: 30 * 24 * 60 * 60 * 1000,
-            partitioned: true
-        };
-
-        res.cookie("token", token, cookieOptions);
+        res.cookie("token", token, getCookieOptions());
 
         res.status(200).json({
             message: "Successfully logged in",
@@ -115,17 +127,13 @@ export const loginUser = async (req, res) => {
  */
 export const logoutUser = async (req, res) => {
     try {
-        // clearCookie alone is unreliable for partitioned/cross-domain cookies.
-        // We overwrite the cookie with empty value + maxAge 0 to force instant expiry.
-        const expireOptions = {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-            partitioned: true,
-            maxAge: 0
-        };
-        res.cookie("token", "", expireOptions);
-        res.clearCookie("token", expireOptions);
+        // Absolute Cookie Clearing Strategy
+        // 1. Set Clear-Site-Data header to forcefully purge all origin cookies
+        res.setHeader("Clear-Site-Data", '"cookies"');
+
+        // 2. Overwrite with identical attributes + immediate expiry (Max-Age: 0, Expires: 1970)
+        res.cookie("token", "", getCookieOptions(true));
+
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed" });

@@ -35,7 +35,7 @@ const itemWorker = new Worker('item-processing', async (job) => {
 
     // --- PHASE 1: Structured Knowledge Extraction (with Fallback) ---
     console.log(`[Worker] ✨ Extracting AI Knowledge for item ${itemId}...`);
-    const aiContent = item.content.slice(0, 10000); // Increased to 10k as per last agreement
+    const aiContent = (item.content || item.title || "").slice(0, 10000); 
     let summary, tags, entities, relationships, nuggets;
 
     try {
@@ -51,9 +51,10 @@ const itemWorker = new Worker('item-processing', async (job) => {
       nuggets = knowledge.nuggets;
     } catch (err) {
       console.error(`[Worker] Knowledge extraction failed, using fallback: ${err.message}`);
+      const fallbackContent = aiContent || item.title || "";
       [tags, summary] = await Promise.all([
-        generateTagsForContent(item.title, aiContent),
-        item.content.length > 50 ? generateAISummary(item.title, aiContent) : ""
+        generateTagsForContent(item.title, fallbackContent),
+        fallbackContent.length > 50 ? generateAISummary(item.title, fallbackContent) : ""
       ]);
       entities = [];
       relationships = [];
@@ -145,10 +146,11 @@ ${(relationships || [])
   }
 }, {
   connection: redisConnection,
-  concurrency: 2,           // Reduced from 5 to lower Redis pressure
-  stalledInterval: 30000,   // Check stalled jobs every 30s (default: 5s) — saves ~80% BullMQ polls
-  lockDuration: 60000,      // Lock job for 60s before considering stalled
-  lockRenewTime: 30000,     // Renew lock every 30s
+  concurrency: 1,           // Single processing to save Redis resources
+  drainDelay: 5,            // Balanced: Wait 5s before polling (Best UX vs Request ratio)
+  stalledInterval: 60000,   // Check stalled jobs every 60s
+  lockDuration: 300000,     // 5 minute lock - massive reduction in heartbeats
+  lockRenewTime: 120000,    // 2 minute renewal - saves thousands of writes
 });
 
 console.log('✅ [Worker] Background processor started and ready');
