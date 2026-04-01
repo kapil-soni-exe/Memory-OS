@@ -22,8 +22,18 @@ const __dirname = path.dirname(__filename)
 
 const app = express()
 
-// Security Headers
-app.use(helmet())
+// Security Headers with permissive CSP for extension compatibility
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'", "https://memory-os.onrender.com", "https://*.vercel.app"],
+      imgSrc: ["'self'", "data:", "https:", "http:"],
+      upgradeInsecureRequests: [],
+    },
+  },
+}))
 app.use(compression())
 
 // Professional Request Logging

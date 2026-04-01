@@ -69,6 +69,7 @@ const getCookieOptions = (isLogout = false) => {
 
     res.status(201).json({
       message: "Welcome to MemoryOS!",
+      token, // ✅ Return token in body for Extension Sync
       user: {
         id: user._id,
         name: user.name,
@@ -109,6 +110,7 @@ export const loginUser = async (req, res) => {
 
         res.status(200).json({
             message: "Successfully logged in",
+            token, // ✅ Return token in body for Extension Sync
             user: {
                 id: user._id,
                 name: user.name,
