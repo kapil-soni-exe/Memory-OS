@@ -11,6 +11,32 @@ export const getItemById = async (id) => {
 };
 
 export const saveItem = async (itemData) => {
+  // 1. If we have a file, it MUST be sent as multipart/form-data
+  if (itemData.file) {
+    const formData = new FormData();
+    
+    // Append all fields to FormData
+    Object.keys(itemData).forEach(key => {
+      // Backend expects 'content' or 'url', but frontend might send 'input'
+      if (key === 'input') {
+        const val = itemData[key]?.trim();
+        if (val?.startsWith('http')) {
+          formData.append('url', val);
+        } else {
+          formData.append('content', val);
+        }
+      } else if (itemData[key] !== undefined && itemData[key] !== null) {
+        formData.append(key, itemData[key]);
+      }
+    });
+
+    const response = await apiClient.post('/items/save', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+
+  // 2. Standard JSON save for notes/URLs without file uploads
   const response = await apiClient.post('/items/save', itemData);
   return response.data;
 };

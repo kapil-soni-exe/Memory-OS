@@ -9,6 +9,8 @@ import { usePrefetchSourcesMutation } from '../../../../modules/composer/hooks/u
 import { useSynthesizeMutation } from '../../../../modules/composer/hooks/useSynthesizeMutation';
 import { composerKeys } from '../../../../modules/composer/keys/composer.keys';
 import { useAddItem } from '../../../../modules/items/hooks/useItemMutation';
+import { useSourcesQuery } from '../../../../modules/composer/hooks/useSourcesQuery';
+import { Book, Link as LinkIcon, FileText as FileIcon, Info, CheckSquare, Square, ChevronDown, ChevronUp } from 'lucide-react';
 import './SecondDraftEditor.css';
 
 
@@ -29,13 +31,15 @@ const SecondDraftEditor = ({
   activeSourceId,
   setActiveSourceId,
   selectedSourceIds = [],
-  setSelectedSourceIds
+  setSelectedSourceIds,
+  onSourceClick // Added for mobile card interaction
 }) => {
   const [step, setStep]           = useState(1);
   const [format, setFormat]       = useState('Notes');
   const [content, setContent]     = useState('');
   const [copied, setCopied]       = useState(false);
   const [refineText, setRefineText] = useState('');
+  const [isSourcesExpanded, setIsSourcesExpanded] = useState(false);
   const promptRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -43,6 +47,15 @@ const SecondDraftEditor = ({
   const preFetchMutation = usePrefetchSourcesMutation();
   const synthesizeMutation = useSynthesizeMutation();
   const saveMutation = useAddItem();
+  const { data: sources = [], isLoading: isSourcesLoading } = useSourcesQuery(lastAnalyzedPrompt || prompt);
+
+  const toggleSource = (id) => {
+    setSelectedSourceIds(prev =>
+      prev.includes(id)
+        ? prev.filter(sid => sid !== id)
+        : [...prev, id]
+    );
+  };
 
   // On Success handlers for UI logic
   useEffect(() => {
@@ -53,13 +66,14 @@ const SecondDraftEditor = ({
       } else {
         setStep(2);
         setSelectedSourceIds(data.sources.map(s => s.itemId));
+        setIsSourcesExpanded(true); // Auto-expand when sources found
         // Sync the stable key for the sidebar
         if (preFetchMutation.variables) {
           setLastAnalyzedPrompt(preFetchMutation.variables);
         }
       }
     }
-  }, [preFetchMutation.isSuccess, preFetchMutation.data, preFetchMutation.variables, setStep, setSelectedSourceIds, setLastAnalyzedPrompt]);
+  }, [preFetchMutation.isSuccess, preFetchMutation.data, preFetchMutation.variables, setStep, setSelectedSourceIds, setLastAnalyzedPrompt, setIsSourcesExpanded]);
 
   useEffect(() => {
     if (synthesizeMutation.isSuccess) {
@@ -287,6 +301,52 @@ const SecondDraftEditor = ({
               : <ChevronRight size={12} />
             }
           </button>
+        </div>
+      )}
+
+      {/* ── Mobile Sources Toolbar (only visible on small screens) ── */}
+      {sources.length > 0 && (
+        <div className={`sde-mobile-sources fade-in ${isSourcesExpanded ? 'is-expanded' : 'is-collapsed'}`}>
+          <button 
+            className="sde-ms-toggle" 
+            onClick={() => setIsSourcesExpanded(!isSourcesExpanded)}
+          >
+            <div className="sde-ms-toggle-left">
+              <span className="sde-ms-title">Sources ({sources.length})</span>
+            </div>
+            {isSourcesExpanded ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+          </button>
+
+          {isSourcesExpanded && (
+            <div className="sde-ms-list slide-up">
+              {sources.map((source) => {
+                const isSelected = selectedSourceIds.includes(source.itemId);
+                
+                return (
+                  <div 
+                    key={source.id} 
+                    className={`sde-ms-card glass ${isSelected ? 'is-selected' : ''}`}
+                  >
+                    <div className="sde-ms-selection-overlay" onClick={() => toggleSource(source.itemId)}>
+                       {isSelected ? <CheckSquare size={14} className="sde-ms-check selected" /> : <Square size={14} className="sde-ms-check" />}
+                    </div>
+                    
+                    <div className="sde-ms-badge">[{source.id}]</div>
+                    <div className="sde-ms-body" onClick={() => onSourceClick({ _id: source.itemId, title: source.title, content: source.text, type: source.source })}>
+                       <div className="sde-ms-type">
+                          {source.source === 'saved docs' ? <Book size={10} /> : 
+                           source.source === 'blog post' ? <LinkIcon size={10} /> : 
+                           <FileIcon size={10} />}
+                          <span>{source.source}</span>
+                       </div>
+                       <h4 className="sde-ms-card-title">{source.title}</h4>
+                       <p className="sde-ms-preview">{source.text}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

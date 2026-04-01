@@ -11,7 +11,7 @@ const SaveModal = ({ isOpen, onClose }) => {
   const [processStep, setProcessStep] = useState(0);
   const addItemMutation = useAddItem();
   const [previewItem, setPreviewItem] = useState(null);
-  
+
   const steps = [
     { icon: Search, text: "Nexus is scanning..." },
     { icon: Brain, text: "Extracting intelligence..." },
@@ -39,23 +39,24 @@ const SaveModal = ({ isOpen, onClose }) => {
   const handleInitialSubmit = async (e) => {
     e.preventDefault();
     if (!formData.input && !formData.file) return;
-    
+
     setView('processing');
     try {
       let data;
       if (formData.file) {
-        // For files, we still use addItem directly (as standard upload flow)
-        // because we don't have a dedicated "file extract" preview yet
-        const item = await addItemMutation.mutateAsync(formData);
-        setPreviewItem(item);
+        // For files, the item is created during this step
+        const response = await addItemMutation.mutateAsync(formData);
+        const savedItem = response?.item || response;
+
+        setPreviewItem(savedItem);
         setTimeout(() => setView('review'), 1000);
       } else {
         // For URLs and text, we use the NEW extraction flow
-        const result = await extractContent({ 
+        const result = await extractContent({
           url: formData.input.startsWith('http') ? formData.input : undefined,
           content: !formData.input.startsWith('http') ? formData.input : undefined
         });
-        
+
         setPreviewItem({
           ...result,
           title: result.title,
@@ -63,7 +64,7 @@ const SaveModal = ({ isOpen, onClose }) => {
           content: result.content,
           url: formData.input.startsWith('http') ? formData.input : undefined
         });
-        
+
         setTimeout(() => setView('review'), 1200);
       }
     } catch (err) {
@@ -76,13 +77,13 @@ const SaveModal = ({ isOpen, onClose }) => {
   const handleRefine = async (e) => {
     e.preventDefault();
     try {
-      // If it's already saved (file upload flow), we update
+      // If it already has an _id, it was already saved (file upload flow)
       if (previewItem._id) {
-        // file logic: item already exists in DB
+        // Just close and sync, the background job handles extraction
         onClose();
         setTimeout(resetForm, 500);
       } else {
-        // preview logic: item NOT in DB yet
+        // Extraction flow: NOT in DB yet, so we POST it
         await addItemMutation.mutateAsync(previewItem);
         onClose();
         setTimeout(resetForm, 500);
@@ -157,21 +158,21 @@ const SaveModal = ({ isOpen, onClose }) => {
               <form className="refinement-form" onSubmit={handleRefine}>
                 <div className="form-field">
                   <label>Title</label>
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     className="refinement-input"
                     value={previewItem.title}
-                    onChange={(e) => setPreviewItem({...previewItem, title: e.target.value})}
+                    onChange={(e) => setPreviewItem({ ...previewItem, title: e.target.value })}
                     placeholder="Enter title"
                   />
                 </div>
 
                 <div className="form-field">
                   <label>Type</label>
-                  <select 
+                  <select
                     className="refinement-select"
                     value={previewItem.type}
-                    onChange={(e) => setPreviewItem({...previewItem, type: e.target.value})}
+                    onChange={(e) => setPreviewItem({ ...previewItem, type: e.target.value })}
                   >
                     {["article", "video", "tweet", "pdf", "image", "note", "thought", "book", "task", "quote", "code"].map(t => (
                       <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
@@ -180,15 +181,15 @@ const SaveModal = ({ isOpen, onClose }) => {
                 </div>
 
                 <div className="preview-snippet">
-                   <label>Content Preview</label>
-                   <p>{previewItem.content?.slice(0, 200)}...</p>
+                  <label>Content Preview</label>
+                  <p>{previewItem.content?.slice(0, 200)}...</p>
                 </div>
 
                 <div className="refinement-footer">
                   <button type="submit" className="refine-btn">Confirm & Save</button>
                   <button type="button" className="cancel-btn" onClick={() => {
-                     onClose();
-                     setTimeout(resetForm, 500);
+                    onClose();
+                    setTimeout(resetForm, 500);
                   }}>Discard</button>
                 </div>
               </form>

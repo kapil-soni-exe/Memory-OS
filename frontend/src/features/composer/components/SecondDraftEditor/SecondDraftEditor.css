@@ -646,3 +646,187 @@
     transform: rotate(360deg);
   }
 }
+
+/* ── Mobile Sources Integration (only active < 900px) ── */
+.sde-mobile-sources {
+  display: none;
+  flex-direction: column;
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  gap: var(--sp-2);
+  z-index: 50;
+}
+
+@media (max-width: 900px) {
+  .sde-mobile-sources {
+    display: flex;
+  }
+
+  .sde-action-bar {
+      border-top: none;
+  }
+}
+
+.sde-ms-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sde-ms-title {
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sde-ms-info {
+  color: var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
+.sde-ms-list {
+  display: flex;
+  overflow-x: auto;
+  gap: var(--sp-2);
+  padding: var(--sp-1) 0 var(--sp-2);
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+
+.sde-ms-list::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Rich Carousel Card Enhancements ── */
+.sde-ms-card {
+  position: relative;
+  width: 240px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: var(--sp-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  transition: all var(--ease-fast);
+}
+
+.sde-ms-card.is-selected {
+  background: var(--fmt-accent-bg, var(--feature-purple-bg));
+  border-color: var(--fmt-accent, var(--feature-purple));
+  border-width: 1.5px;
+}
+
+.sde-ms-selection-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  transition: all var(--ease-fast);
+  z-index: 10;
+}
+
+.sde-ms-selection-overlay:hover {
+  color: var(--color-text-primary);
+}
+
+.sde-ms-check.selected {
+  color: var(--fmt-accent, var(--feature-purple));
+}
+
+.sde-ms-badge {
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  color: var(--fmt-accent, var(--feature-purple));
+  margin-bottom: var(--sp-1);
+}
+
+.sde-ms-body {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.sde-ms-type {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: 9px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--sp-1);
+}
+
+.sde-ms-card-title {
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sde-ms-preview {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sde-ms-card.is-selected .sde-ms-card-title,
+.sde-ms-card.is-selected .sde-ms-type {
+  color: var(--fmt-accent, var(--feature-purple));
+}
+/* -- Collapsible Logic -- */
+.sde-ms-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--sp-1) 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all var(--ease-fast);
+}
+
+.sde-ms-toggle:hover {
+  color: var(--color-text-primary);
+}
+
+.sde-ms-list.slide-up {
+  animation: sde-slide-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sde-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 400px;
+  }
+}
+
+.sde-mobile-sources.is-collapsed .sde-ms-list {
+  display: none;
+}

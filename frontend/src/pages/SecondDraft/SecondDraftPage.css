@@ -64,12 +64,17 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
+  .composer-container {
+    padding-bottom: 100px; /* Safe space for MobileTabs floating island */
+  }
+
   .composer-workspace {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: 1fr;
+    gap: 0;
   }
 
   .source-region {
-    max-height: 260px;
+    display: none; /* Injected directly into Editor shell on mobile */
   }
 }
