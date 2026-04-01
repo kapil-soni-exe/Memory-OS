@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           image: extractedData?.image,
           author: extractedData?.author,
           type: extractedData?.type || "web",
-          source: new URL(tab.url).hostname
+          source: "extension" // ✅ Enum Match: 'web', 'extension', 'api', 'manual'
         })
       });
 

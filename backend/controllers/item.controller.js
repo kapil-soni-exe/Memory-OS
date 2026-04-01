@@ -65,6 +65,12 @@ export const saveItem = async (req, res) => {
       relatedItems,
       input: providedInput // Fallback for clients sending 'input' instead of content/url
     } = req.body;
+    
+    // ✅ Logic: Prevent Mongoose Enum Validation Errors (Enum: 'web', 'extension', 'api', 'manual')
+    if (providedSource && !['web', 'extension', 'api', 'manual'].includes(providedSource)) {
+        console.warn(`[API] ⚠️ Invalid source "${providedSource}" received. Defaulting to "web".`);
+        providedSource = "web";
+    }
 
     // Handle 'input' alias
     if (providedInput && !providedUrl && !providedContent) {
