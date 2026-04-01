@@ -11,6 +11,12 @@
     "notifications",
     "cookies"
   ],
+  "externally_connectable": {
+    "matches": [
+      "https://memory-os-nine.vercel.app/*",
+      "http://localhost:5173/*"
+    ]
+  },
   "host_permissions": [
     "<all_urls>"
   ],

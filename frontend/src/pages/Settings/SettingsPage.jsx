@@ -22,7 +22,7 @@ const SettingsPage = () => {
       <Sidebar />
       <div className="home-main">
         <Topbar />
-        
+
         <main className="settings-container">
           <div className="settings-header">
             <h1>Settings</h1>
@@ -30,7 +30,7 @@ const SettingsPage = () => {
           </div>
 
           <div className="settings-layout">
-            
+
             {/* Sidebar Tabs */}
             <div className="settings-sidebar">
               {tabs.map(tab => (
@@ -43,7 +43,7 @@ const SettingsPage = () => {
                   <span>{tab.label}</span>
                 </button>
               ))}
-              
+
               <div className="settings-divider"></div>
 
               <button className="settings-tab text-danger" onClick={logout}>
@@ -54,18 +54,18 @@ const SettingsPage = () => {
 
             {/* Content Area */}
             <div className="settings-content">
-              
+
               {activeTab === 'profile' && (
                 <div className="settings-panel animate-fade-in">
                   <h2>My Profile</h2>
                   <p className="panel-desc">Your personal information and account details.</p>
-                  
+
                   <div className="settings-card">
                     <div className="form-group">
                       <label>Name</label>
                       <input type="text" value={user?.name || ''} disabled className="form-input" />
                     </div>
-                    
+
                     <div className="form-group mt-4">
                       <label>Email Address</label>
                       <input type="email" value={user?.email || ''} disabled className="form-input" />
@@ -78,14 +78,14 @@ const SettingsPage = () => {
                 <div className="settings-panel animate-fade-in">
                   <h2>Appearance</h2>
                   <p className="panel-desc">Customize how MemoryOS looks on your device.</p>
-                  
+
                   <div className="settings-card flex-between">
                     <div>
                       <h3>Theme Mode</h3>
                       <p className="panel-desc">Toggle between light and dark modes.</p>
                     </div>
-                    
-                    <button 
+
+                    <button
                       className={`simple-theme-toggle ${theme === 'dark' ? 'dark' : 'light'}`}
                       onClick={toggleTheme}
                     >

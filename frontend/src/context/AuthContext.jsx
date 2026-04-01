@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const data = await signupUser(userData);
+      if (data.token) localStorage.setItem('token', data.token); // ✅ Sync with Extension
       setUser(data.user);
       return data;
     } catch (err) {
@@ -51,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       const data = await loginUser(credentials);
+      if (data.token) localStorage.setItem('token', data.token); // ✅ Sync with Extension
       setUser(data.user);
       return data;
     } catch (err) {
@@ -66,6 +68,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     setLoading(true);
     try {
+      localStorage.removeItem('token'); // ✅ Clear Extension Session
       await logoutUser();
       setUser(null);
       // Hard redirect: clears ALL React state + TanStack Query cache

@@ -20,39 +20,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   urlPreview.textContent = new URL(tab.url).hostname;
   saveBtn.disabled = true;
 
-  // Helper to get auth header from cookies
+  // ✅ New Auth Header Logic: Storage First, then Cookies
   const getAuthHeader = async () => {
     try {
-      // 1. Unpartitioned check
+      // 1. Try Chrome Storage FIRST (The most reliable way)
+      const stored = await chrome.storage.local.get("token");
+      if (stored.token) {
+        console.log("✅ Using token from Storage.");
+        return { "Authorization": `Bearer ${stored.token}` };
+      }
+
+      // 2. Legacy Fallback: Try Cookies
       let allCookies = await chrome.cookies.getAll({ name: "token" });
       let cookie = allCookies.find(c => c.domain.includes("onrender") || c.domain.includes("vercel") || c.domain.includes("localhost") || c.domain.includes("127.0.0.1"));
-      console.log("1. All token cookies found:", allCookies);
-
-      // 2. Partitioned check explicitly
-      if (!cookie) {
-        const partCookies = await chrome.cookies.getAll({
-          url: "https://memory-os.onrender.com",
-          partitionKey: { topLevelSite: "https://memory-os-nine.vercel.app" }
-        });
-        console.log("2. Partitioned token lookup:", partCookies);
-        cookie = partCookies.find(c => c.name === "token");
-      }
-
-      // 3. Last fallback checking ANY onrender cookie
-      if (!cookie) {
-        const renderCookies = await chrome.cookies.getAll({ domain: "memory-os.onrender.com" });
-        console.log("3. All OnRender cookies fallback:", renderCookies);
-        cookie = renderCookies.find(c => c.name === "token");
-      }
-
+      
       if (cookie?.value) {
-        console.log("Token successfully retrieved!");
+        console.log("⚠️ Using token from Cookies (Legacy).");
         return { "Authorization": `Bearer ${cookie.value}` };
       }
-      console.warn("Token NOT found anywhere.");
+
+      console.warn("❌ No token found in Storage or Cookies.");
       return {};
     } catch (e) {
-      console.warn("Failed to read cookies entirely:", e);
+      console.error("Auth retrieval failed:", e);
       return {};
     }
   };
