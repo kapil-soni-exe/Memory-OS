@@ -43,7 +43,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 // Global API Rate Limiting
-// app.use(globalRateLimiter)
+app.use(globalRateLimiter)
 
 app.use(express.json())
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
@@ -71,7 +71,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 
 // Specific Rate Limiting for Auth
 // app.use("/api/auth", authRateLimiter)
-app.use("/api/auth", authRoutes);
+app.use("/api/auth",authRateLimiter ,authRoutes);
 
 // Render Heartbeat & Liveness Probe
 app.get("/api/health", (req, res) => {
