@@ -24,6 +24,12 @@
   transition: transform var(--ease-base), box-shadow var(--ease-base), border-color var(--ease-base);
 }
 
+:root.dark-theme .features__card {
+  background: rgba(28, 28, 30, 0.5); /* Semi-transparent */
+  backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
 .features__card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-md);

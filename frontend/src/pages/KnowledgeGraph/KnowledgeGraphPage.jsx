@@ -10,6 +10,9 @@ import useGraphView from '../../modules/graph/hooks/useGraphView';
 import useGraphNavigation from '../../modules/graph/hooks/useGraphNavigation';
 import './KnowledgeGraphPage.css';
 
+import { motion } from 'framer-motion';
+import { pageTransition } from '../../styles/animations';
+
 const KnowledgeGraphPage = () => {
   const navigate = useNavigate();
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -57,7 +60,11 @@ const KnowledgeGraphPage = () => {
   }, [level, selectedNode, topics]);
 
   return (
-    <div className="graph-page-fullscreen">
+    <motion.div 
+      className="graph-page-wrapper"
+      {...pageTransition}
+      style={{ height: '100%', width: '100%', position: 'relative' }}
+    >
       {/* Floating Back Button */}
       <button className="graph-back-btn glass" onClick={handleBack}>
         <ArrowLeft size={20} />
@@ -130,7 +137,7 @@ const KnowledgeGraphPage = () => {
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 };
 

@@ -5,14 +5,14 @@ import {
   ChevronRight, Sparkles, Folder, Filter
 } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import Sidebar from '../../layouts/Sidebar/Sidebar';
-import Topbar from '../../layouts/Topbar/Topbar';
+import { motion } from 'framer-motion';
 import SavedItemCard from '../../modules/items/components/SavedItemCard/SavedItemCard';
 import ItemDetailPanel from '../../modules/items/components/ItemDetailPanel/ItemDetailPanel';
 import SaveModal from '../../modules/items/components/SaveModal/SaveModal';
 import { getTopicById } from '../../modules/items/services/topic.api';
 import { useDeleteItem } from '../../modules/items/hooks/useItemMutation';
 import { useDeleteTopic } from '../../modules/items/hooks/useTopicMutation';
+import { pageTransition } from '../../styles/animations';
 import './TopicDetail.css';
 
 const LEVEL_COLORS = {
@@ -70,185 +70,164 @@ const TopicDetail = () => {
   // ── Loading State ──
   if (isLoading) {
     return (
-      <div className="td-layout">
-        <Sidebar />
-        <div className="td-main">
-          <Topbar onSaveClick={() => setIsSaveModalOpen(true)} />
-          <main className="td-content">
-            <div className="td-loading">
-              <div className="td-loading-icon">
-                <Folder size={24} />
-              </div>
-              <p>Loading topic...</p>
+      <motion.div className="td-content-wrapper" {...pageTransition}>
+        <main className="td-content">
+          <div className="td-loading">
+            <div className="td-loading-icon">
+              <Folder size={24} />
             </div>
-          </main>
-        </div>
-      </div>
+            <p>Loading topic...</p>
+          </div>
+        </main>
+      </motion.div>
     );
   }
 
   // ── Error State ──
   if (error || !topic) {
     return (
-      <div className="td-layout">
-        <Sidebar />
-        <div className="td-main">
-          <Topbar onSaveClick={() => setIsSaveModalOpen(true)} />
-          <main className="td-content">
-            <button className="td-back-btn" onClick={() => navigate('/topics')}>
-              <ArrowLeft size={16} />
-              <span>Explorer</span>
-            </button>
-            <div className="td-loading">
-              <p>Topic not found.</p>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="td-layout">
-      <Sidebar />
-
-      <div className="td-main">
-        <Topbar onSaveClick={() => setIsSaveModalOpen(true)} />
-
+      <motion.div className="td-content-wrapper" {...pageTransition}>
         <main className="td-content">
-
-          {/* ── Back Button ── */}
           <button className="td-back-btn" onClick={() => navigate('/topics')}>
             <ArrowLeft size={16} />
             <span>Explorer</span>
           </button>
+          <div className="td-loading">
+            <p>Topic not found.</p>
+          </div>
+        </main>
+      </motion.div>
+    );
+  }
 
-          {/* ── Hero Header ── */}
-          <header className="td-header" style={{ '--accent': accentColor }}>
-            <div className="td-header-inner">
-              <div className="td-icon-wrap" style={{ background: `color-mix(in srgb, ${accentColor} 12%, transparent)`, color: accentColor }}>
-                <Folder size={24} />
-              </div>
+  return (
+    <motion.div 
+      className="td-content-wrapper"
+      {...pageTransition}
+    >
+      <main className="td-content">
+        <button className="td-back-btn" onClick={() => navigate('/topics')}>
+          <ArrowLeft size={16} />
+          <span>Explorer</span>
+        </button>
 
-              <div className="td-header-text">
-                {/* Breadcrumb for sub-topics */}
-                {topic.level > 1 && topic.parentTopicId && (
-                  <div className="td-breadcrumb">
-                    <span onClick={() => navigate(`/topics/${topic.parentTopicId}`)}>
-                      Parent Topic
-                    </span>
-                    <ChevronRight size={12} />
-                    <span className="td-breadcrumb-current">Current</span>
-                  </div>
-                )}
-
-                <h1 className="td-title">{topic.topicName}</h1>
-                <p className="td-stats">
-                  {items.length} {items.length === 1 ? 'memory' : 'memories'}
-                  {subTopics.length > 0 && ` · ${subTopics.length} sub-folders`}
-                </p>
-              </div>
+        <header className="td-header" style={{ '--accent': accentColor }}>
+          <div className="td-header-inner">
+            <div className="td-icon-wrap" style={{ background: `color-mix(in srgb, ${accentColor} 12%, transparent)`, color: accentColor }}>
+              <Folder size={24} />
             </div>
 
-            {/* Actions */}
-            <div className="td-actions">
-              <button
-                className="td-action-btn danger"
-                onClick={handleDeleteTopic}
-                disabled={deleteTopicMutation.isPending}
-                title="Delete topic"
-              >
-                <Trash2 size={16} />
-              </button>
-              <button className="td-action-btn" title="Filter">
-                <Filter size={16} />
-              </button>
-              <button className="td-action-btn" title="More options">
-                <MoreHorizontal size={16} />
-              </button>
+            <div className="td-header-text">
+              {topic.level > 1 && topic.parentTopicId && (
+                <div className="td-breadcrumb">
+                  <span onClick={() => navigate(`/topics/${topic.parentTopicId}`)}>
+                    Parent Topic
+                  </span>
+                  <ChevronRight size={12} />
+                  <span className="td-breadcrumb-current">Current</span>
+                </div>
+              )}
+
+              <h1 className="td-title">{topic.topicName}</h1>
+              <p className="td-stats">
+                {items.length} {items.length === 1 ? 'memory' : 'memories'}
+                {subTopics.length > 0 && ` · ${subTopics.length} sub-folders`}
+              </p>
             </div>
-          </header>
-
-          {/* ── AI Reason Badge ── */}
-          {topic.reason && (
-            <div className="td-reason-badge">
-              <Sparkles size={13} />
-              <span>{topic.reason}</span>
-            </div>
-          )}
-
-          {/* ── Level Badge ── */}
-          <div className="td-level-row">
-            <span
-              className="td-level-badge"
-              style={{
-                background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
-                color: accentColor,
-                borderColor: `color-mix(in srgb, ${accentColor} 25%, transparent)`,
-              }}
-            >
-              Level {topic.level} Topic
-            </span>
-
-            {topic.confidence > 0 && (
-              <span className="td-confidence">
-                {Math.round(topic.confidence * 100)}% confidence
-              </span>
-            )}
           </div>
 
-          {/* ── Sub-Topics Section ── */}
-          {subTopics.length > 0 && (
-            <section className="td-section">
-              <h2 className="td-section-title">Sub-Folders</h2>
-              <div className="td-sub-grid">
-                {subTopics.map(sub => (
-                  <div
-                    key={sub._id}
-                    className="td-sub-chip"
-                    onClick={() => navigate(`/topics/${sub._id}`)}
-                  >
-                    <div className="td-sub-icon">
-                      <Folder size={16} />
-                    </div>
-                    <div className="td-sub-info">
-                      <h3>{sub.topicName}</h3>
-                      <span>{sub.itemCount} items</span>
-                    </div>
-                    <ChevronRight size={14} className="td-sub-chevron" />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          <div className="td-actions">
+            <button
+              className="td-action-btn danger"
+              onClick={handleDeleteTopic}
+              disabled={deleteTopicMutation.isPending}
+              title="Delete topic"
+            >
+              <Trash2 size={16} />
+            </button>
+            <button className="td-action-btn" title="Filter">
+              <Filter size={16} />
+            </button>
+            <button className="td-action-btn" title="More options">
+              <MoreHorizontal size={16} />
+            </button>
+          </div>
+        </header>
 
-          {/* ── Memories Section ── */}
+        {topic.reason && (
+          <div className="td-reason-badge">
+            <Sparkles size={13} />
+            <span>{topic.reason}</span>
+          </div>
+        )}
+
+        <div className="td-level-row">
+          <span
+            className="td-level-badge"
+            style={{
+              background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+              color: accentColor,
+              borderColor: `color-mix(in srgb, ${accentColor} 25%, transparent)`,
+            }}
+          >
+            Level {topic.level} Topic
+          </span>
+
+          {topic.confidence > 0 && (
+            <span className="td-confidence">
+              {Math.round(topic.confidence * 100)}% confidence
+            </span>
+          )}
+        </div>
+
+        {subTopics.length > 0 && (
           <section className="td-section">
-            <h2 className="td-section-title">Curated Memories</h2>
-            <div className="td-items-grid">
-              {items.length === 0 ? (
-                <div className="td-empty">
-                  <p>No memories in this topic yet.</p>
-                </div>
-              ) : (
-                items.map(item => (
-                  <div
-                    key={item._id}
-                    className="td-card-wrapper"
-                    onClick={() => setSelectedItem(item)}
-                  >
-                    <SavedItemCard
-                      item={item}
-                      onDelete={handleDeleteItem}
-                    />
+            <h2 className="td-section-title">Sub-Folders</h2>
+            <div className="td-sub-grid">
+              {subTopics.map(sub => (
+                <div
+                  key={sub._id}
+                  className="td-sub-chip"
+                  onClick={() => navigate(`/topics/${sub._id}`)}
+                >
+                  <div className="td-sub-icon">
+                    <Folder size={16} />
                   </div>
-                ))
-              )}
+                  <div className="td-sub-info">
+                    <h3>{sub.topicName}</h3>
+                    <span>{sub.itemCount} items</span>
+                  </div>
+                  <ChevronRight size={14} className="td-sub-chevron" />
+                </div>
+              ))}
             </div>
           </section>
+        )}
 
-        </main>
-      </div>
+        <section className="td-section">
+          <h2 className="td-section-title">Curated Memories</h2>
+          <div className="td-items-grid">
+            {items.length === 0 ? (
+              <div className="td-empty">
+                <p>No memories in this topic yet.</p>
+              </div>
+            ) : (
+              items.map(item => (
+                <div
+                  key={item._id}
+                  className="td-card-wrapper"
+                  onClick={() => setSelectedItem(item)}
+                >
+                  <SavedItemCard
+                    item={item}
+                    onDelete={handleDeleteItem}
+                  />
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </main>
 
       <ItemDetailPanel
         item={selectedItem}
@@ -261,7 +240,7 @@ const TopicDetail = () => {
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 };
 

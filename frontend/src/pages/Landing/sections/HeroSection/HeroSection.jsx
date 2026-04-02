@@ -19,56 +19,83 @@ const ICON_COLORS = [
   'var(--feature-green-bg)'
 ];
 
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer, microSpring } from '../../../../styles/animations';
+
 const HeroSection = () => (
   <section className="hero" id="hero">
     <div className="container hero__inner">
 
       {/* ── Left column ── */}
-      <div className="hero__copy">
-        <div className="section-eyebrow">
+      <motion.div 
+        className="hero__copy"
+        variants={staggerContainer}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.div variants={fadeInUp} className="section-eyebrow">
           <Sparkles size={13} strokeWidth={2.2} />
           AI-powered knowledge management
-        </div>
+        </motion.div>
 
-        <h1 className="hero__headline">
+        <motion.h1 variants={fadeInUp} className="hero__headline">
           Your AI-powered<br />
           <span className="gradient-text">second brain</span>
-        </h1>
+        </motion.h1>
 
-        <p className="hero__subline">
+        <motion.p variants={fadeInUp} className="hero__subline">
           Save articles, PDFs, tweets, and videos from anywhere.
           MemoryOS automatically summarizes, tags, and connects
           your knowledge — so you can think deeper, not harder.
-        </p>
+        </motion.p>
 
-        <div className="hero__actions">
-          <Link to="/signup" className="hero__cta hero__cta--primary">
-            Get Started free
-            <ArrowRight size={16} strokeWidth={2.2} />
-          </Link>
-          <a href="#how-it-works" className="hero__cta hero__cta--ghost">
+        <motion.div variants={fadeInUp} className="hero__actions">
+          <motion.div {...microSpring}>
+            <Link to="/signup" className="hero__cta hero__cta--primary">
+              Get Started free
+              <ArrowRight size={16} strokeWidth={2.2} />
+            </Link>
+          </motion.div>
+          <motion.a 
+            href="#how-it-works" 
+            className="hero__cta hero__cta--ghost"
+            whileHover={{ y: -2, backgroundColor: 'var(--color-surface-sunken)' }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
             <span className="hero__play-wrap">
-              <Play size={12} fill="currentColor" />
+              <Play size={12} fill="#fff" />
             </span>
             See how it works
-          </a>
-        </div>
+          </motion.a>
+        </motion.div>
 
         {/* Social proof */}
-        <div className="hero__proof">
+        <motion.div variants={fadeInUp} className="hero__proof">
           <div className="hero__proof-avatars">
             {['#7F5AF0', '#007AFF', '#F72585', '#28CA42'].map((c, i) => (
-              <span key={i} className="hero__proof-avatar" style={{ background: c }} />
+              <motion.span 
+                key={i} 
+                className="hero__proof-avatar" 
+                style={{ background: c }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8 + (i * 0.1) }}
+              />
             ))}
           </div>
           <span className="hero__proof-text">
             Trusted by <strong>4,200+</strong> knowledge workers
           </span>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* ── Right column — UI mockup ── */}
-      <div className="hero__visual">
+      <motion.div 
+        className="hero__visual"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+      >
         <div className="hero__window">
           {/* Browser chrome */}
           <div className="hero__chrome">
@@ -81,20 +108,31 @@ const HeroSection = () => (
           {/* Mockup body */}
           <div className="hero__mockup-body">
             {/* Search bar */}
-            <div className="hero__mockup-search">
+            <motion.div 
+              className="hero__mockup-search"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 1, duration: 0.5 }}
+            >
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="6.5" cy="6.5" r="5" stroke="#6E6E73" strokeWidth="1.5"/>
-                <path d="M10.5 10.5 14 14" stroke="#6E6E73" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="6.5" cy="6.5" r="5" stroke="var(--color-text-secondary)" strokeWidth="1.5"/>
+                <path d="M10.5 10.5 14 14" stroke="var(--color-text-secondary)" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
               <span>Search your second brain…</span>
               <span className="hero__mockup-search-cmd">⌘K</span>
-            </div>
+            </motion.div>
 
             {/* Item list */}
             <div className="hero__mockup-label">Recently saved</div>
             <ul className="hero__mockup-list">
               {SAVED_ITEMS.map((item, i) => (
-                <li key={item.title} className="hero__mockup-item" style={{ animationDelay: `${i * 80}ms` }}>
+                <motion.li 
+                  key={item.title} 
+                  className="hero__mockup-item"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 + (i * 0.1) }}
+                >
                   <div className="hero__mockup-icon" style={{ background: ICON_COLORS[i] }}>
                     {item.icon}
                   </div>
@@ -103,30 +141,45 @@ const HeroSection = () => (
                     <span className="hero__mockup-tag">{item.tag}</span>
                   </div>
                   <div className="hero__mockup-dot" />
-                </li>
+                </motion.li>
               ))}
             </ul>
 
             {/* AI tag badge */}
-            <div className="hero__ai-chip">
+            <motion.div 
+              className="hero__ai-chip"
+              animate={{
+                scale: [1, 1.05, 1],
+                opacity: [0.8, 1, 0.8]
+              }}
+              transition={{ repeat: Infinity, duration: 3 }}
+            >
               <Sparkles size={12} />
               AI summary generated
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {/* Floating accent cards */}
-        <div className="hero__float hero__float--tl">
+        <motion.div 
+          className="hero__float hero__float--tl"
+          animate={{ y: [0, -10, 0] }}
+          transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+        >
           <div className="hero__float-label">New save</div>
           <div className="hero__float-content">📰 NYT Article saved</div>
-        </div>
-        <div className="hero__float hero__float--br">
+        </motion.div>
+        <motion.div 
+          className="hero__float hero__float--br"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
+        >
           <div className="hero__float-label">AI Tags</div>
           <div className="hero__float-tags">
             <span>AI</span><span>Research</span><span>LLM</span>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
     </div>
   </section>

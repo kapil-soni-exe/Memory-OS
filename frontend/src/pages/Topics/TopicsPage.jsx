@@ -1,14 +1,14 @@
 import * as React from "react";
-import { Search, Plus, Brain, SlidersHorizontal } from 'lucide-react';
+import { Search, Brain, SlidersHorizontal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import Sidebar from '../../layouts/Sidebar/Sidebar';
-import Topbar from '../../layouts/Topbar/Topbar';
 import TopicCard from '../../modules/items/components/TopicCard/TopicCard';
 import SaveModal from '../../modules/items/components/SaveModal/SaveModal';
 import { getTopics } from '../../modules/items/services/topic.api';
 import { useDeleteTopic } from '../../modules/items/hooks/useTopicMutation';
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer, pageTransition } from '../../styles/animations';
 import './TopicsPage.css';
 
 const TopicsPage = () => {
@@ -51,130 +51,140 @@ const TopicsPage = () => {
   };
 
   return (
-    <div className="topics-layout">
-      <Sidebar />
+    <motion.div 
+      className="topics-content-wrapper"
+      {...pageTransition}
+    >
+      <main className="topics-content">
 
-      <div className="topics-main">
-        <Topbar onSaveClick={() => setIsSaveModalOpen(true)} />
+        {/* ── Header ── */}
+        <motion.header 
+          className="page-header"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
+          <div className="header-left">
+            <motion.div variants={fadeInUp} className="header-eyebrow">
+              <div className="header-eyebrow-dot" />
+              Knowledge Galaxy
+            </motion.div>
+            <motion.h1 variants={fadeInUp} className="page-title">Your Second Brain</motion.h1>
+            <motion.p variants={fadeInUp} className="page-subtitle">
+              AI-organized topics, auto-structured into hierarchies
+            </motion.p>
+          </div>
 
-        <main className="topics-content">
+          <div className="header-right">
+            {!isLoading && !error && (
+              <motion.div variants={fadeInUp} className="header-stats">
+                <div className="stat-block">
+                  <span className="stat-num">{rootTopics.length}</span>
+                  <span className="stat-label">Root Topics</span>
+                </div>
+                <div className="stat-block">
+                  <span className="stat-num">{totalMemories}</span>
+                  <span className="stat-label">Memories</span>
+                </div>
+              </motion.div>
+            )}
+          </div>
+        </motion.header>
 
-          {/* ── Header ── */}
-          <header className="page-header">
-            <div className="header-left">
-              <div className="header-eyebrow">
-                <div className="header-eyebrow-dot" />
-                Knowledge Galaxy
+        {/* ── Search ── */}
+        <motion.div 
+          className="search-controls"
+          variants={fadeInUp}
+          initial="initial"
+          animate="animate"
+          transition={{ delay: 0.2 }}
+        >
+          <div className="search-row">
+            <div className="search-box-wrapper">
+              <Search className="search-icon" />
+              <input
+                type="text"
+                className="topic-search-input"
+                placeholder="Search root topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <button className="filter-btn">
+              <SlidersHorizontal size={14} />
+              Filter
+            </button>
+          </div>
+        </motion.div>
+
+        {/* ── Section Label ── */}
+        {!isLoading && !error && filteredTopics.length > 0 && (
+          <motion.div 
+            className="topics-section-label"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            {searchQuery
+              ? `${filteredTopics.length} result${filteredTopics.length !== 1 ? 's' : ''} found`
+              : 'Root Topics'
+            }
+          </motion.div>
+        )}
+
+        {/* ── Grid ── */}
+        <motion.div 
+          className="topics-grid"
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+          layout // Enable layout animations for smooth reordering
+        >
+          {isLoading ? (
+            <div className="loading-state">
+              <div className="empty-icon-wrap">
+                <Brain size={28} />
               </div>
-              <h1 className="page-title">Your Second Brain</h1>
-              <p className="page-subtitle">
-                AI-organized topics, auto-structured into hierarchies
+              <p>Synthesizing neural map...</p>
+            </div>
+
+          ) : error ? (
+            <div className="error-state">
+              <p>Error loading topics. Please try again.</p>
+            </div>
+
+          ) : filteredTopics.length === 0 ? (
+            <div className="empty-state-simple">
+              <div className="empty-icon-wrap">
+                <Brain size={28} />
+              </div>
+              <p>
+                {searchQuery
+                  ? `No topics matching "${searchQuery}"`
+                  : 'No root topics yet. Save an item to begin!'
+                }
               </p>
             </div>
 
-            <div className="header-right">
-              {/* Stats — only show when data is loaded */}
-              {!isLoading && !error && (
-                <div className="header-stats">
-                  <div className="stat-block">
-                    <span className="stat-num">{rootTopics.length}</span>
-                    <span className="stat-label">Root Topics</span>
-                  </div>
-                  <div className="stat-block">
-                    <span className="stat-num">{totalMemories}</span>
-                    <span className="stat-label">Memories</span>
-                  </div>
-                </div>
-              )}
-
-              <button
-                className="create-topic-btn"
-                onClick={() => setIsSaveModalOpen(true)}
-              >
-                <Plus size={16} />
-                Save Item
-              </button>
-            </div>
-          </header>
-
-          {/* ── Search ── */}
-          <div className="search-controls">
-            <div className="search-row">
-              <div className="search-box-wrapper">
-                <Search className="search-icon" />
-                <input
-                  type="text"
-                  className="topic-search-input"
-                  placeholder="Search root topics..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <button className="filter-btn">
-                <SlidersHorizontal size={14} />
-                Filter
-              </button>
-            </div>
-          </div>
-
-          {/* ── Section Label ── */}
-          {!isLoading && !error && filteredTopics.length > 0 && (
-            <div className="topics-section-label">
-              {searchQuery
-                ? `${filteredTopics.length} result${filteredTopics.length !== 1 ? 's' : ''} found`
-                : 'Root Topics'
-              }
-            </div>
+          ) : (
+            filteredTopics.map((topic) => (
+              <TopicCard
+                key={topic._id}
+                topic={topic}
+                onClick={() => handleTopicClick(topic._id)}
+                onDelete={handleDeleteTopic}
+              />
+            ))
           )}
+        </motion.div>
 
-          {/* ── Grid ── */}
-          <div className="topics-grid">
-            {isLoading ? (
-              <div className="loading-state">
-                <div className="empty-icon-wrap">
-                  <Brain size={28} />
-                </div>
-                <p>Synthesizing neural map...</p>
-              </div>
-
-            ) : error ? (
-              <div className="error-state">
-                <p>Error loading topics. Please try again.</p>
-              </div>
-
-            ) : filteredTopics.length === 0 ? (
-              <div className="empty-state-simple">
-                <div className="empty-icon-wrap">
-                  <Brain size={28} />
-                </div>
-                <p>
-                  {searchQuery
-                    ? `No topics matching "${searchQuery}"`
-                    : 'No root topics yet. Save an item to begin!'
-                  }
-                </p>
-              </div>
-
-            ) : (
-              filteredTopics.map((topic) => (
-                <TopicCard
-                  key={topic._id}
-                  topic={topic}
-                  onClick={() => handleTopicClick(topic._id)}
-                  onDelete={handleDeleteTopic}
-                />
-              ))
-            )}
-          </div>
-
-        </main>
-      </div>
+      </main>
 
       <SaveModal
         isOpen={isSaveModalOpen}
         onClose={() => setIsSaveModalOpen(false)}
       />
-    </div>
+    </motion.div>
   );
 };
 

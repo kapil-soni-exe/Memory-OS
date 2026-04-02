@@ -362,11 +362,7 @@ Add this at the END of the global.css file
 /* ─── Button Improvements ───────────────── */
 
 button {
-  transition: transform var(--ease-fast), box-shadow var(--ease-fast);
-}
-
-button:hover {
-  transform: translateY(-1px);
+  cursor: pointer;
 }
 
 /* ─── Reusable Card Component ───────────────── */
@@ -375,13 +371,6 @@ button:hover {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--ease-base), box-shadow var(--ease-base);
-}
-
-.card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md);
 }
 
 /* ─── Glass Surface Utility (Modern AI UI) ───────────────── */

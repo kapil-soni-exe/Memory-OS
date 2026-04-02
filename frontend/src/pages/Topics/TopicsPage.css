@@ -226,31 +226,6 @@
   50% { opacity: 0.9; transform: scale(1.04); }
 }
 
-/* ── Create Topic Button ── */
-.create-topic-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-  background: var(--color-text-primary);
-  color: var(--color-bg);
-  border: none;
-  padding: var(--sp-3) var(--sp-6);
-  border-radius: var(--radius-full);
-  font-size: var(--text-sm);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--ease-spring);
-  box-shadow: var(--shadow-sm);
-  flex-shrink: 0;
-}
-
-.create-topic-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-  opacity: 0.9;
-}
-
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .topics-content {

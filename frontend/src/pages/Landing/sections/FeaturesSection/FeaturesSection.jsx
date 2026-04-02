@@ -33,32 +33,52 @@ const FEATURES = [
   },
 ];
 
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer } from '../../../../styles/animations';
+
 const FeaturesSection = () => (
   <section className="features" id="features">
     <div className="container">
-      <div className="section-header">
-        <span className="section-eyebrow">Features</span>
-        <h2 className="section-heading">
+      <motion.div 
+        className="section-header"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
+      >
+        <motion.span variants={fadeInUp} className="section-eyebrow">Features</motion.span>
+        <motion.h2 variants={fadeInUp} className="section-heading">
           Everything your knowledge<br />
           <span className="gradient-text">needs to grow</span>
-        </h2>
-        <p className="section-subheading">
+        </motion.h2>
+        <motion.p variants={fadeInUp} className="section-subheading">
           Stop losing great ideas. MemoryOS turns a firehose of content into
           a structured, searchable, and beautifully connected knowledge base.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      <div className="features__grid">
+      <motion.div 
+        className="features__grid"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={staggerContainer}
+      >
         {FEATURES.map(({ Icon, title, description, accent, bg }) => (
-          <article className="features__card" key={title}>
+          <motion.article 
+            className="features__card" 
+            key={title}
+            variants={fadeInUp}
+            whileHover={{ y: -5, boxShadow: 'var(--shadow-lg)' }}
+          >
             <div className="features__icon-wrap" style={{ background: bg }}>
               <Icon size={24} strokeWidth={1.8} color={accent} />
             </div>
             <h3 className="features__title">{title}</h3>
             <p className="features__desc">{description}</p>
-          </article>
+          </motion.article>
         ))}
-      </div>
+      </motion.div>
     </div>
   </section>
 );

@@ -55,6 +55,9 @@ function getTopicColor(topicName = '') {
   return TOPIC_COLORS[Math.abs(hash) % TOPIC_COLORS.length];
 }
 
+import { motion, AnimatePresence } from 'framer-motion';
+import { itemRevealer, springHover, microSpring } from '../../../../styles/animations';
+
 const TopicCard = ({ topic, onClick, onDelete }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -89,40 +92,55 @@ const TopicCard = ({ topic, onClick, onDelete }) => {
   const subCount = topic.subTopics?.length || topic.subCount || 0;
 
   return (
-    <div
+    <motion.div
+      variants={itemRevealer}
+      layout
+      {...springHover}
       className="topic-card"
       onClick={onClick}
       style={{ '--card-accent': color.bar }}
     >
       {/* Top row — icon + menu */}
       <div className="tc-top">
-        <div
+        <motion.div
+          variants={microSpring}
+          whileHover="whileHover"
+          whileTap="whileTap"
           className="tc-icon"
           style={{ background: color.iconBg, color: color.iconColor }}
         >
           <Folder size={20} />
-        </div>
+        </motion.div>
 
         <div className="tc-menu-wrapper" ref={menuRef}>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             className="tc-menu-btn"
             onClick={handleMenuToggle}
             aria-label="Topic options"
           >
             <MoreHorizontal size={16} />
-          </button>
+          </motion.button>
 
-          {menuOpen && (
-            <div className="tc-dropdown">
-              <button
-                className="tc-dropdown-item danger"
-                onClick={handleDelete}
+          <AnimatePresence>
+            {menuOpen && (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                className="tc-dropdown"
               >
-                <Trash2 size={14} />
-                Delete topic
-              </button>
-            </div>
-          )}
+                <button
+                  className="tc-dropdown-item danger"
+                  onClick={handleDelete}
+                >
+                  <Trash2 size={14} />
+                  Delete topic
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -138,8 +156,10 @@ const TopicCard = ({ topic, onClick, onDelete }) => {
       <div className="tc-footer">
         <div className="tc-tags">
           {visibleTags.map(tag => (
-            <span
+            <motion.span
               key={tag}
+              initial={{ opacity: 0, x: -5 }}
+              animate={{ opacity: 1, x: 0 }}
               className="tc-tag"
               style={{
                 background: color.tagBg,
@@ -147,7 +167,7 @@ const TopicCard = ({ topic, onClick, onDelete }) => {
               }}
             >
               {tag}
-            </span>
+            </motion.span>
           ))}
         </div>
 
@@ -164,8 +184,13 @@ const TopicCard = ({ topic, onClick, onDelete }) => {
       </div>
 
       {/* Bottom accent bar */}
-      <div className="tc-accent-bar" />
-    </div>
+      <motion.div 
+        className="tc-accent-bar" 
+        initial={{ width: 0 }}
+        animate={{ width: '100%' }}
+        transition={{ delay: 0.5, duration: 0.8 }}
+      />
+    </motion.div>
   );
 };
 

@@ -7,8 +7,8 @@
 .cta__card {
   position: relative;
   overflow: hidden;
-  background: var(--color-surface-sunken);
-  border: 1px solid var(--color-border);
+  background: #111113; /* Fixed dark for both modes */
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-2xl);
   padding: var(--sp-24) var(--sp-16);
   text-align: center;
@@ -114,24 +114,24 @@
 }
 
 .cta__btn--white {
-  background: var(--color-btn-dark-bg);
-  color: var(--color-btn-dark-text);
+  background: #fff; /* Fixed light for dark card */
+  color: #111113;
   box-shadow: var(--shadow-md);
 }
 .cta__btn--white:hover {
-  background: var(--color-surface-sunken);
+  background: #f4f4f4;
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
 .cta__btn--ghost {
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 .cta__btn--ghost:hover {
-  color: var(--color-text-primary);
-  border-color: var(--color-border-strong);
-  background: var(--color-btn-ghost-bg);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Fine print */
@@ -155,17 +155,17 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 2px solid var(--color-surface-sunken);
+  border: 2px solid #111113;
   margin-left: -8px;
 }
 .cta__proof-avatar:first-child { margin-left: 0; }
 
 .cta__proof-text {
   font-size: var(--text-sm);
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.6);
 }
 .cta__proof-text strong {
-  color: rgba(255, 255, 255, 0.85);
+  color: #fff;
   font-weight: var(--weight-semibold);
 }
 

@@ -9,14 +9,14 @@ import { useDeleteItem } from "../../../modules/items/hooks/useItemMutation";
  */
 const SearchSection = ({ searchProps, onItemClick }) => {
   const { searchQuery, clearSearch } = searchProps;
-  
+
   // Step 3: USE QUERY
   const { data: searchResults = [], isLoading, error } = useSearchQuery(searchQuery);
   const deleteMutation = useDeleteItem();
 
   // Visibility logic
   const isSearchActive = searchQuery && searchQuery.length >= 3;
-  
+
   if (isLoading && isSearchActive) return <div className="search-loading">Searching Knowledge Galaxy...</div>;
   if (!isSearchActive || !searchResults) return null;
 

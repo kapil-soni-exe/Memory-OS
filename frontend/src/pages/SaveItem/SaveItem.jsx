@@ -6,6 +6,9 @@ import SaveForm from '../../modules/items/components/SaveForm/SaveForm';
 import { saveItem } from '../../modules/items/services/item.api';
 import './SaveItem.css';
 
+import { motion } from 'framer-motion';
+import { pageTransition } from '../../styles/animations';
+
 const SaveItem = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ input: '' });
@@ -27,8 +30,10 @@ const SaveItem = () => {
   };
 
   return (
-    <div className="save-page-layout">
-      <Sidebar />
+    <motion.div 
+      className="save-page-wrapper"
+      {...pageTransition}
+    >
       <main className="save-page-content">
         <div className="save-page-container">
           <header className="save-page-header">
@@ -62,7 +67,7 @@ const SaveItem = () => {
           </section>
         </div>
       </main>
-    </div>
+    </motion.div>
   );
 };
 

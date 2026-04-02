@@ -23,7 +23,7 @@ const Landing = () => (
       <div className="container footer__inner">
         <div className="footer__brand">
           <img src="/logo.png" alt="MemoryOS" className="footer__logo" />
-          <span className="footer__name">MemoryOS</span>
+          
         </div>
 
         <p className="footer__copy">

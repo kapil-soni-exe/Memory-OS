@@ -29,26 +29,54 @@ const STEPS = [
   },
 ];
 
+import { motion } from 'framer-motion';
+import { fadeInUp, staggerContainer } from '../../../../styles/animations';
+
 const HowItWorksSection = () => (
   <section className="how" id="how-it-works">
     <div className="container">
-      <div className="section-header">
-        <span className="section-eyebrow">How it works</span>
-        <h2 className="section-heading">
+      <motion.div 
+        className="section-header"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={staggerContainer}
+      >
+        <motion.span variants={fadeInUp} className="section-eyebrow">How it works</motion.span>
+        <motion.h2 variants={fadeInUp} className="section-heading">
           Three steps to a smarter<br />
           <span className="gradient-text">knowledge base</span>
-        </h2>
-        <p className="section-subheading">
+        </motion.h2>
+        <motion.p variants={fadeInUp} className="section-subheading">
           MemoryOS handles the heavy lifting so your brain can focus on thinking,
           creating, and connecting ideas.
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
 
-      <div className="how__grid">
+      <motion.div 
+        className="how__grid"
+        initial="initial"
+        whileInView="animate"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={staggerContainer}
+      >
         {STEPS.map(({ Icon, step, title, description, accent, bg }, i) => (
-          <div className="how__card" key={step}>
+          <motion.div 
+            className="how__card" 
+            key={step}
+            variants={fadeInUp}
+            whileHover={{ y: -5 }}
+          >
             {/* Step number */}
-            <div className="how__step">{step}</div>
+            <motion.div 
+              className="how__step"
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.5 + (i * 0.2) }}
+            >
+              {step}
+            </motion.div>
 
             {/* Icon */}
             <div className="how__icon-wrap" style={{ background: bg }}>
@@ -60,15 +88,22 @@ const HowItWorksSection = () => (
 
             {/* Connector */}
             {i < STEPS.length - 1 && (
-              <div className="how__connector" aria-hidden="true">
+              <motion.div 
+                className="how__connector" 
+                aria-hidden="true"
+                initial={{ opacity: 0, x: -10 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.7 + (i * 0.2) }}
+              >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                   <path d="M12 5v14M5 12l7 7 7-7" stroke="#D1D1D6" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
-              </div>
+              </motion.div>
             )}
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   </section>
 );
