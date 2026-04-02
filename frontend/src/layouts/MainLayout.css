@@ -27,13 +27,20 @@
   .app-layout {
     flex-direction: column;
   }
-  
-  .main-view-container {
-    height: auto;
-    overflow-y: visible;
+
+  .main-view-container:has(.no-scroll-layout) {
+    height: 100%;
+    overflow: hidden;
+    min-height: 0;
   }
-  
-  .content-view {
-    padding: var(--sp-4);
+
+  .content-view:has(.no-scroll-layout) {
+    flex: 1;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
   }
 }

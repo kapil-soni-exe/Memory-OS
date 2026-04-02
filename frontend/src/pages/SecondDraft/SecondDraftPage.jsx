@@ -27,7 +27,7 @@ const SecondDraftPage = () => {
 
   return (
     <motion.div
-      className="second-draft-content-wrapper"
+      className="second-draft-content-wrapper no-scroll-layout"
       {...pageTransition}
     >
       <main className="second-draft-content">
