@@ -1,16 +1,26 @@
-# React + Vite
+# 🪐 MemoryOS: Frontend (Vite + React)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend for [MemoryOS](file:///../README.md), your immersive knowledge galaxy.
 
-Currently, two official plugins are available:
+## 🚀 Dev Stack
+- **React 19** with Vite 8 (Ultra-fast HMR)
+- **TanStack Query v5** for robust data fetching.
+- **D3.js** for the Knowledge Galaxy visualization.
+- **Framer Motion** for premium interface animations.
+- **Lucide React** for modern icons.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🏁 Getting Started
 
-## React Compiler
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+2. **Setup Env**:
+   Create a `.env` file based on your project configuration (Vite prefix required, e.g., `VITE_API_URL`).
+3. **Run Dev**:
+   ```bash
+   npm run dev
+   ```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🏗️ Architecture
+We follow a modular feature-based architecture located in `src/modules/` (Auth, Composer, Items, Nexus). Layouts are separated between the `MainLayout` and the `SecondDraft` studio.
