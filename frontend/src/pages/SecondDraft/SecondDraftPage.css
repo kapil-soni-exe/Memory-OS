@@ -2,6 +2,23 @@
    SECOND DRAFT PAGE — Layout
    ============================================ */
 
+ 
+.second-draft-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.second-draft-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; 
+}  
+
 .second-draft-layout {
   display: flex;
   height: 100vh;
@@ -65,16 +82,19 @@
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .composer-container {
-    padding-bottom: 100px; /* Safe space for MobileTabs floating island */
+    padding-bottom: 100px;
+    /* Safe space for MobileTabs floating island */
+    overflow-y: auto;
   }
 
   .composer-workspace {
     grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+    /* grid-template-rows: 1fr; */
     gap: 0;
   }
 
   .source-region {
-    display: none; /* Injected directly into Editor shell on mobile */
+    display: none;
+    /* Injected directly into Editor shell on mobile */
   }
 }

@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../../layouts/Sidebar/Sidebar';
-import Topbar from '../../layouts/Topbar/Topbar';
 import SecondDraftEditor from '../../features/composer/components/SecondDraftEditor/SecondDraftEditor';
 import SourceSidebar from '../../features/composer/components/SourceSidebar/SourceSidebar';
 import ItemDetailPanel from '../../modules/items/components/ItemDetailPanel/ItemDetailPanel';
@@ -28,7 +26,7 @@ const SecondDraftPage = () => {
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="second-draft-content-wrapper"
       {...pageTransition}
     >
