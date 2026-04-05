@@ -206,8 +206,16 @@ export const saveItem = async (req, res) => {
       });
     }
 
+    // Handle Mongoose Cast Error (Invalid ID format)
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        message: `Invalid ID format for field: ${error.path}`,
+        error: "invalid_id"
+      });
+    }
+
     res.status(500).json({
-      message: "An internal error occurred while saving. Please try again.",
+      message: "An internal error occurred while saving. Please check your connection and try again.",
       error: error.message
     });
   }

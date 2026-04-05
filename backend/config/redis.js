@@ -3,23 +3,29 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const PRIMARY_URL = process.env.REDIS_URL;
-const BACKUP_URL = process.env.BULLMQ_REDIS_URL;
+const RENDER_REDIS_URL = process.env.BULLMQ_REDIS_URL;
+const UPSTASH_REDIS_URL = process.env.REDIS_URL;
 const LOCAL_URL = 'redis://127.0.0.1:6379';
 
-let currentUrl = PRIMARY_URL || BACKUP_URL || LOCAL_URL;
-let isUsingBackup = !PRIMARY_URL && !!BACKUP_URL;
+// Prioritize Render Redis over Upstash now that Upstash hit its limit
+let currentUrl = RENDER_REDIS_URL || UPSTASH_REDIS_URL || LOCAL_URL;
+let isUsingBackup = !RENDER_REDIS_URL && !!UPSTASH_REDIS_URL;
 
-console.log(`[Redis] 🚀 Initializing with ${isUsingBackup ? 'Backup' : 'Primary'} provider...`);
+console.log(`[Redis] 🚀 Initializing with ${isUsingBackup ? 'Upstash' : 'Render'} provider...`);
 
 const options = {
   maxRetriesPerRequest: null,
   lazyConnect: true,
   enableOfflineQueue: true,
   offlineQueueCheckPeriod: 30000,
-  keepAlive: 10000,         // Keep connection warm to reduce handshake latency
-  connectTimeout: 10000,    // Fail fast if connection is hanging
+  keepAlive: 10000,         
+  connectTimeout: 15000,    // Increased timeout for Render internal networking
 };
+
+// Automatically enable TLS if rediss:// is used
+if (currentUrl.startsWith('rediss://')) {
+    options.tls = { rejectUnauthorized: false }; // Required for many hosted Redis providers
+}
 
 const redisConnection = new Redis(currentUrl, options);
 
@@ -27,31 +33,31 @@ const redisConnection = new Redis(currentUrl, options);
 redisConnection.on('error', (err) => {
   const errorMessage = err.message.toLowerCase();
   
-  // Detect Upstash Quota/Limit Errors
-  const isQuotaError = errorMessage.includes('quota') || 
-                       errorMessage.includes('forbidden') || 
-                       errorMessage.includes('limit');
+  // Failover condition: Quota reached, connection refused, or forbidden
+  const shouldFailover = errorMessage.includes('quota') || 
+                         errorMessage.includes('forbidden') || 
+                         errorMessage.includes('limit') ||
+                         errorMessage.includes('econnrefused');
 
-  if (isQuotaError && !isUsingBackup && BACKUP_URL) {
-    console.warn('\n⚠️  [Redis] Primary (Upstash) reached limit or returned forbidden error.');
-    console.warn('🔄  [Redis] AUTOMATIC FAILOVER: Switching to Backup (Render Redis)...');
+  if (shouldFailover && !isUsingBackup && UPSTASH_REDIS_URL) {
+    console.warn('\n⚠️  [Redis] Main provider failure. Switching to Backup...');
     
     isUsingBackup = true;
     
-    // Disconnect safely and update the connection URL for future attempts
-    redisConnection.disconnect();
+    // Update connection settings for the backup
+    const backupUrl = new URL(UPSTASH_REDIS_URL);
+    redisConnection.options.host = backupUrl.hostname;
+    redisConnection.options.port = parseInt(backupUrl.port) || 6379;
+    redisConnection.options.password = decodeURIComponent(backupUrl.password);
     
-    // We update the connector's internal options so it uses the backup on next connect
-    redisConnection.options.host = new URL(BACKUP_URL).hostname;
-    redisConnection.options.port = parseInt(new URL(BACKUP_URL).port) || 6379;
-    redisConnection.options.password = new URL(BACKUP_URL).password;
-    if (BACKUP_URL.startsWith('rediss://')) {
-        redisConnection.options.tls = {};
+    if (UPSTASH_REDIS_URL.startsWith('rediss://')) {
+        redisConnection.options.tls = { rejectUnauthorized: false };
     }
 
     // Force a fresh connection
+    redisConnection.disconnect();
     redisConnection.connect().catch(e => {
-        console.error('❌ [Redis] Failover to Backup failed:', e.message);
+        console.error('❌ [Redis] Failover failed:', e.message);
     });
   } else {
     console.error('⚠️  [Redis] Connection error:', err.message);
@@ -59,7 +65,7 @@ redisConnection.on('error', (err) => {
 });
 
 redisConnection.on('connect', () => {
-  console.log(`✅ [Redis] Connected successfully (${isUsingBackup ? 'Backup' : 'Primary'})`);
+  console.log(`✅ [Redis] Connected successfully (${isUsingBackup ? 'Backup' : 'Main'})`);
 });
 
 export default redisConnection;
