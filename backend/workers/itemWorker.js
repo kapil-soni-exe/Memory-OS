@@ -140,10 +140,16 @@ ${(relationships || [])
 
     // (Log removed for production)
   } catch (error) {
-    console.error(`[Worker] Error processing item ${itemId}:`, error.message);
-    await Item.findByIdAndUpdate(itemId, { processingStatus: "failed" });
-    throw error; // Allows BullMQ to handle retries
-  }
+  
+  
+ 
+
+  await Item.findByIdAndUpdate(itemId, {
+    processingStatus: "failed"
+  });
+
+  throw error;
+}
 }, {
   connection: redisConnection,
   concurrency: 1,           // Single processing to save Redis resources
