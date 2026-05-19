@@ -27,9 +27,15 @@ Your memories visualized as a living, breathing constellation.
 *   **Interactive Explorer**: Fly through your knowledge and discover hidden connections.
 
 ### 📥 Intelligent Capture
-*   **Chrome Extension**: One-click save from anywhere on the web.
+*   **One-Click Save**: One-click save from anywhere on the web via our Chrome Extension.
 *   **Deep Parsing**: High-fidelity scraping for web articles, YouTube transcripts, and PDFs.
 *   **OCR Support**: Automated text extraction from images using Tesseract.js.
+
+### 🌟 AI Nuggets & Knowledge Stories
+A daily, bite-sized insight engine built directly into your home feed.
+*   **Automated Extraction**: Every saved item is processed by **Groq (Llama 3.3 70B)** to extract 3-5 punchy "Knowledge Nuggets".
+*   **Interactive Stories**: View your insights in a premium, Instagram-style stories component.
+*   **Video Pinpointing**: AI-extracted nuggets from YouTube videos are pinned to specific timestamps for quick navigation.
 
 ---
 
@@ -59,11 +65,13 @@ graph TD
     FE -->|API Post| BE[Express Server]
     BE -->|Job| MQ[BullMQ / Redis]
     MQ -->|Scrape/OCR| Worker[Background Workers]
-    Worker -->|Embeddings| AI[OpenAI / Cohere]
+    Worker -->|AI Extraction| AI_Insights[Groq / Cohere]
+    AI_Insights -->|Knowledge Nuggets| DB
     Worker -->|Store| DB[(MongoDB)]
     BE -->|Query| DB
     BE -->|Vector Search| QD[Qdrant]
     FE -->|Visualize| GV[Knowledge Graph - D3]
+    FE -->|Daily Stories| SN[AI Nuggets / Stories]
 ```
 
 ---
